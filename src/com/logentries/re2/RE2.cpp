@@ -1,8 +1,10 @@
 #include <re2/re2.h>
 #include <boost/pool/object_pool.hpp>
 #include <boost/assert.hpp>
+#include <new>
 #include <cstdio>
 #include "RE2.h"
+#include "op.h"
 #include "Options.h"
 
 static boost::object_pool<RE2> pool;
@@ -90,6 +92,11 @@ public:
     }
 };
 
+static bool is_empty_arr(JNIEnv *env, jarray j_arr) {
+    return j_arr == 0 || env->GetArrayLength(j_arr) == 0;
+    
+}
+
 JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2_compileImpl
   (JNIEnv *env, jclass cls, jstring j_str, jobject j_options) {
     Options options(env, j_options);
@@ -107,40 +114,96 @@ JNIEXPORT void JNICALL Java_com_logentries_re2_RE2_releaseImpl
     pool.destroy(pointer);
 }
 
+struct FullMatchCOp {
+    const char *str_;
+    const RE2 *pattern_;
+
+    FullMatchCOp(const char *str, const RE2 *pattern)
+    :   str_(str),
+        pattern_(pattern)
+    { }
+
+    bool operator()(const RE2::Arg* const args[], const int n) const {
+        return RE2::FullMatchN(str_, *pattern_, args, n);
+    }
+};
+
 JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_fullMatchImpl__Ljava_lang_String_2J_3Ljava_lang_Object_2
   (JNIEnv *env, jclass cls, jstring j_str, jlong j_pointer, jobjectArray j_args) {
     const char *str = env->GetStringUTFChars(j_str, 0);
     RE2 *pointer = reinterpret_cast<RE2*>(j_pointer);
-    const jboolean res = static_cast<jboolean>( RE2::FullMatch(str, *pointer) );
+    const bool res = is_empty_arr(env, j_args) ? RE2::FullMatch(str, *pointer) : do_op(env, FullMatchCOp(str, pointer), j_args);
     env->ReleaseStringUTFChars(j_str, str);
-    return res;
+    return static_cast<jboolean>(res);
 }
+
+struct PartialMatchCOp {
+    const char *str_;
+    const RE2 *pattern_;
+
+    PartialMatchCOp(const char *str, const RE2 *pattern)
+    :   str_(str),
+        pattern_(pattern)
+    { }
+
+    bool operator()(const RE2::Arg* const args[], const int n) const {
+        return RE2::PartialMatchN(str_, *pattern_, args, n);
+    }
+};
 
 JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_lang_String_2J_3Ljava_lang_Object_2
   (JNIEnv *env, jclass cls, jstring j_str, jlong j_pointer, jobjectArray j_args) {
     const char *str = env->GetStringUTFChars(j_str, 0);
     RE2 *pointer = reinterpret_cast<RE2*>(j_pointer);
-    const jboolean res = static_cast<jboolean>( RE2::PartialMatch(str, *pointer) );
+    const bool res = is_empty_arr(env, j_args) ? RE2::PartialMatch(str, *pointer) : do_op(env, PartialMatchCOp(str, pointer), j_args);
     env->ReleaseStringUTFChars(j_str, str);
-    return res;
+    return static_cast<jboolean>(res);
 }
+
+struct FullMatchOp {
+    const char *str_;
+    const char *pattern_;
+
+    FullMatchOp(const char *str, const char *pattern)
+    :   str_(str),
+        pattern_(pattern)
+    { }
+
+    bool operator()(const RE2::Arg* const args[], const int n) const {
+        return RE2::FullMatchN(str_, pattern_, args, n);
+    }
+};
 
 JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_fullMatchImpl__Ljava_lang_String_2Ljava_lang_String_2_3Ljava_lang_Object_2
   (JNIEnv *env, jclass cls, jstring j_str, jstring j_pattern, jobjectArray j_args) {
     const char *str = env->GetStringUTFChars(j_str, 0);
     const char *pattern = env->GetStringUTFChars(j_pattern, 0);
-    const jboolean res = static_cast<jboolean>( RE2::FullMatch(str, pattern) );
+    const bool res = is_empty_arr(env, j_args) ? RE2::FullMatch(str, pattern) : do_op(env, FullMatchOp(str, pattern), j_args);
     env->ReleaseStringUTFChars(j_str, str);
     env->ReleaseStringUTFChars(j_pattern, pattern);
-    return res;
+    return static_cast<jboolean>(res);
 }
+
+struct PartialMatchOp {
+    const char *str_;
+    const char *pattern_;
+
+    PartialMatchOp(const char *str, const char *pattern)
+    :   str_(str),
+        pattern_(pattern)
+    { }
+
+    bool operator()(const RE2::Arg* const args[], const int n) const {
+        return RE2::PartialMatchN(str_, pattern_, args, n);
+    }
+};
 
 JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_lang_String_2Ljava_lang_String_2_3Ljava_lang_Object_2
   (JNIEnv *env, jclass cls, jstring j_str, jstring j_pattern, jobjectArray j_args) {
     const char *str = env->GetStringUTFChars(j_str, 0);
     const char *pattern = env->GetStringUTFChars(j_pattern, 0);
-    const jboolean res = static_cast<jboolean>( RE2::PartialMatch(str, pattern) );
+    const bool res = is_empty_arr(env, j_args) ? RE2::PartialMatch(str, pattern) : do_op(env, PartialMatchOp(str, pattern), j_args);
     env->ReleaseStringUTFChars(j_str, str);
     env->ReleaseStringUTFChars(j_pattern, pattern);
-    return res;
+    return static_cast<jboolean>(res);
 }
