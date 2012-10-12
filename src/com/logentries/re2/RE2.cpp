@@ -1,13 +1,10 @@
 #include <re2/re2.h>
-#include <boost/pool/object_pool.hpp>
 #include <boost/assert.hpp>
 #include <new>
 #include <cstdio>
 #include "RE2.h"
 #include "op.h"
 #include "Options.h"
-
-static boost::object_pool<RE2> pool;
 
 template<typename Dst, typename Src>
 static Dst safe_cast(Src src) {
@@ -101,7 +98,7 @@ JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2_compileImpl
   (JNIEnv *env, jclass cls, jstring j_str, jobject j_options) {
     Options options(env, j_options);
     const char *str = env->GetStringUTFChars(j_str, 0);
-    RE2 *pointer = pool.construct(str, options);
+    RE2 *pointer = new RE2(str, options);
     env->ReleaseStringUTFChars(j_str, str);
     jlong j_pointer = reinterpret_cast<jlong>(pointer);
     BOOST_VERIFY(reinterpret_cast<RE2*>(j_pointer) == pointer);
@@ -111,7 +108,8 @@ JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2_compileImpl
 JNIEXPORT void JNICALL Java_com_logentries_re2_RE2_releaseImpl
   (JNIEnv *env, jclass cls, jlong j_pointer) {
     RE2 *pointer = reinterpret_cast<RE2*>(j_pointer);
-    pool.destroy(pointer);
+    //pool.destroy(pointer);
+    delete pointer;
 }
 
 struct FullMatchCOp {
