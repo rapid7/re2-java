@@ -210,7 +210,7 @@ public class GenRegExpr {
         }
     }
 
-    public String generator() {
+    public String next() {
         return genPostfix(new Stack<Operator>(), 0, 0, 0);
     }
 }
