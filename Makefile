@@ -1,4 +1,9 @@
+#
+# Inspired by https://github.com/xerial/snappy-java/blob/develop/Makefile .
+#
+
 OBJ=obj
+MVN=mvn
 NATIVES-TARGET=src/main/resources/NATIVE/$(shell bin/os-arch.sh)/$(shell bin/os-name.sh)
 
 all: build
