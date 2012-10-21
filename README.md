@@ -17,8 +17,8 @@ Note: Mercurial is used to download latest version of re2 sources.
 
 ### Compilation ###
 
-Simply type  
-    $ make  
+Simply type
+    $ make
 .
 
 It downloads latest version of re2, builds re2 library in separate directory and builds so library with JNI bindigs too.
