@@ -1,6 +1,8 @@
 package com.logentries.re2;
 
-public class RE2 {
+import java.lang.AutoCloseable;
+
+public class RE2 implements AutoCloseable {
     private static native long compileImpl(final String pattern, final Options options);
     private static native void releaseImpl(final long pointer);
     private static native boolean fullMatchImpl(final String str, final long pointer, Object ... args);
@@ -24,10 +26,10 @@ public class RE2 {
         pointer = compileImpl(pattern, options);
     }
     static {
-        if (!EmbeddedLibraryTools.LOADED_EMBEDDED_LIBRARY_RE2) {
+        if (!EmbeddedLibraryTools.LOADED_RE2) {
             System.loadLibrary("re2");
         }
-        if (!EmbeddedLibraryTools.LOADED_EMBEDDED_LIBRARY_RE2_JAVA) {
+        if (!EmbeddedLibraryTools.LOADED_RE2_JAVA) {
             System.loadLibrary("re2-java");
         }
     }
@@ -37,6 +39,10 @@ public class RE2 {
             releaseImpl(pointer);
             pointer = 0;
         }
+    }
+
+    public void close() {
+        dispoze();
     }
 
     public static boolean fullMatch(final String str, final String pattern, Object ... args) {

@@ -1,5 +1,9 @@
 package com.logentries.re2;
 
+/*
+ * Inspired by https://github.com/zeromq/jzmq/tree/master/src/org/zeromq .
+ */
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -15,12 +19,12 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class EmbeddedLibraryTools {
-    public static final boolean LOADED_EMBEDDED_LIBRARY_RE2;
-    public static final boolean LOADED_EMBEDDED_LIBRARY_RE2_JAVA;
+    public static final boolean LOADED_RE2;
+    public static final boolean LOADED_RE2_JAVA;
 
     static {
-        LOADED_EMBEDDED_LIBRARY_RE2 = loadEmbeddedLibrary("libre2");
-        LOADED_EMBEDDED_LIBRARY_RE2_JAVA = LOADED_EMBEDDED_LIBRARY_RE2 && loadEmbeddedLibrary("libre2-java");
+        LOADED_RE2 = loadEmbeddedLibrary("libre2");
+        LOADED_RE2_JAVA = LOADED_RE2 && loadEmbeddedLibrary("libre2-java");
     }
 
     public static String getCurrentPlatformIdentifier() {
