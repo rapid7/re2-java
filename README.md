@@ -22,4 +22,4 @@ $ make
 .
 
 It downloads latest version of re2, builds re2 library in separate directory and builds so library with JNI bindigs too.
-Finnally jar file that includes so libraries files is produced in the target folder.
+Finally jar file that includes so libraries files is produced in the target folder.
