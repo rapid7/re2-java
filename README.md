@@ -28,10 +28,10 @@ You can type:
 
     $ make clean
 
-to clean all files that comes inot existence during normal run of make.
+to clean all files that come into existence during normal run of make.
 
-### Instalation ###
+### Installation ###
 
 After running of `make`, directory `target` contains jar file with the library. You can include it to your `classpath`.
-Library files (libre2.so and libre2-java.so) are part of the jar file as well. They are extracted during JVM
+Native library files (libre2.so and libre2-java.so) are part of the jar file as well. They are extracted during JVM
 startup, saved into temporary files and dynamically loaded into the address space of the JVM.
