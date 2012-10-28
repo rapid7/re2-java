@@ -158,7 +158,7 @@ static JavaRE2_AnyType get_type(JNIEnv *env, jobject j_object) {
     if (is_string_arr(env, j_cls)) {
         return JavaRE2_STRING;
     }
-    BOOST_VERIFY(!"Unexpected parameter supplied"); // Hey, throw exception here ! ;-)
+    BOOST_VERIFY(!"Unexpected parameter supplied"); // This should not occure, args are checked from Java
 }
 
 static jsize sum_lengths(JNIEnv *env, jobjectArray j_args) {
@@ -194,8 +194,8 @@ static bool do_op(JNIEnv *env, const Op &op, jobjectArray j_args) {
     };
     const jsize j_args_len = env->GetArrayLength(j_args);
     const jsize j_total_len = sum_lengths(env, j_args);
-    if (j_total_len > 31) { // Magical contant from re2 source code :-)
-        BOOST_VERIFY(!"Throw an exception here");
+    if (j_total_len > 31) {
+        BOOST_VERIFY(!"Megical constant from re2 source code exceeded"); // This should not occure, args are checked from Java
     }
 
     Buf buf_args[j_total_len];

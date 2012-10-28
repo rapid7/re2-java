@@ -1,8 +1,9 @@
 package com.logentries.re2;
 
-import java.lang.AutoCloseable;
+// Note: AutoCloseable is available since Java 7 for support of try-with-resources statement
+//import java.lang.AutoCloseable;
 
-public class RE2 implements AutoCloseable {
+public class RE2 /* implements AutoCloseable */ {
     private static native long compileImpl(final String pattern, final Options options);
     private static native void releaseImpl(final long pointer);
     private static native boolean fullMatchImpl(final String str, final long pointer, Object ... args);
@@ -13,7 +14,7 @@ public class RE2 implements AutoCloseable {
 
     private long pointer;
 
-    private void check_state() throws IllegalStateException {
+    private void checkState() throws IllegalStateException {
         if (pointer == 0) {
             throw new IllegalStateException();
         }
@@ -45,21 +46,53 @@ public class RE2 implements AutoCloseable {
         dispoze();
     }
 
+    static private int checkArg(final Object obj) throws IllegalArgumentException {
+        if (obj instanceof int[]) {
+            return ((int[])obj).length;
+        }
+        if (obj instanceof long[]) {
+            return ((long[])obj).length;
+        }
+        if (obj instanceof float[]) {
+            return ((float[])obj).length;
+        }
+        if (obj instanceof double[]) {
+            return ((double[])obj).length;
+        }
+        if (obj instanceof String[]) {
+            return ((String[])obj).length;
+        }
+        throw new IllegalArgumentException();
+    }
+
+    static private void checkArgs(Object ... args) throws IllegalArgumentException {
+        int length = 0;
+        for (Object arg: args) {
+            if ((length += checkArg(arg)) > 31) {
+                throw new IllegalArgumentException("Only up to 32 arguments supported");
+            }
+        }
+    }
+
     public static boolean fullMatch(final String str, final String pattern, Object ... args) {
+        checkArgs(args);
         return fullMatchImpl(str, pattern, args);
     }
 
     public static boolean partialMatch(final String str, final String pattern, Object ... args) {
+        checkArgs(args);
         return partialMatchImpl(str, pattern, args);
     }
 
     public boolean fullMatch(final String str, Object ... args) throws IllegalStateException {
-        check_state();
+        checkState();
+        checkArgs(args);
         return fullMatchImpl(str, pointer, args);
     }
 
     public boolean partialMatch(final String str, Object ... args) throws IllegalStateException {
-        check_state();
+        checkState();
+        checkArgs(args);
         return partialMatchImpl(str, pointer, args);
     }
 }
