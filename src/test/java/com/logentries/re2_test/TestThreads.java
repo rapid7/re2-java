@@ -70,6 +70,7 @@ public class TestThreads {
         }
 
         Thread[] ths = new Thread[12];
+        System.err.println("Running test consisting of " + ths.length + " threads");
         for (int i = 0; i < ths.length; ++i) {
             (ths[i] = new Thread(new Worker())).start();
         }

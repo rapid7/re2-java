@@ -13,10 +13,97 @@ import java.util.Arrays;
 import java.util.regex.Pattern;
 
 public class TestRandomExpr {
+    private static class InterruptibleCharSequence implements CharSequence {
+        CharSequence inner;
+
+        public InterruptibleCharSequence(CharSequence inner) {
+            super();
+            this.inner = inner;
+        }
+
+        public char charAt(int index) {
+            if (Thread.interrupted()) { // clears flag if set
+                throw new RuntimeException(new InterruptedException());
+            }
+            return inner.charAt(index);
+        }
+
+        public int length() {
+            return inner.length();
+        }
+
+        public CharSequence subSequence(int start, int end) {
+            return new InterruptibleCharSequence(inner.subSequence(start, end));
+        }
+
+        @Override
+        public String toString() {
+            return inner.toString();
+        }
+    }
+
     private List<String> mAlphabet = Arrays.asList("aaa", "b", "ccc");
 
     private GenRegExpr genRegExpr = new GenRegExpr(mAlphabet, 3, 12);
     private GenString genString = new GenString(mAlphabet, 15);
+
+    private static Boolean applyMatches(final Pattern pattern, final String str) {
+        class ApplyMatches implements Runnable {
+            private volatile Boolean res = null;
+            public Boolean getRes() {
+                return res;
+            }
+
+            public void run() {
+                res = pattern.matcher(new InterruptibleCharSequence(str)).matches();
+            }
+        }
+        ApplyMatches am = new ApplyMatches();
+        Thread thread = new Thread(am);
+        thread.start();
+        try {
+            thread.join(1500);
+        } catch (InterruptedException ex) {
+        }
+        final Boolean res = am.getRes();
+        if (res == null) {
+            thread.interrupt();
+            try {
+                thread.join();
+            } catch (InterruptedException ex) {
+            }
+        }
+        return res;
+    }
+
+    private static Boolean applyFind(final Pattern pattern, final String str) {
+        class ApplyFind implements Runnable {
+            private volatile Boolean res = null;
+            public Boolean getRes() {
+                return res;
+            }
+
+            public void run() {
+                res = pattern.matcher(new InterruptibleCharSequence(str)).find();
+            }
+        }
+        ApplyFind af = new ApplyFind();
+        Thread thread = new Thread(af);
+        thread.start();
+        try {
+            thread.join(1500);
+        } catch (InterruptedException ex) {
+        }
+        final Boolean res = af.getRes();
+        if (res == null) {
+            thread.interrupt();
+            try {
+                thread.join();
+            } catch (InterruptedException ex) {
+            }
+        }
+        return res;
+    }
 
     private void compareOneRandExpr(final int index) {
         final String regExprStr = genRegExpr.next();
@@ -30,19 +117,29 @@ public class TestRandomExpr {
         for (int i = 0; i < 25; ++i) {
             final String str = genString.next();
             System.err.println("\t" + str);
-            final boolean matches = pattern.matcher(str).matches();
+            final Boolean matches = applyMatches(pattern, str);
+            if (matches == null) {
+                System.err.println("Timeout of matches(.) for re=[" + regExprStr + "] and string=[" + str + "]");
+            }
             System.err.println("\t\tPattern.matches()");
             final boolean re2_matches = re2.fullMatch(str);
             System.err.println("\t\tRE2.matches()");
-            final boolean found = pattern.matcher(str).find();
+            final Boolean found = applyFind(pattern, str);
+            if (found == null) {
+                System.err.println("Timeout of find(.) for re=[" + regExprStr + "] and string=[" + str + "]");
+            }
             System.err.println("\t\tPattern.find()");
             final boolean re2_found = re2.partialMatch(str);
             System.err.println("\t\tRE2.partialMatch()");
-            if (matches != re2_matches || found != re2_found) {
+            if ((matches != null && matches != re2_matches) || (found != null && found != re2_found)) {
                 System.err.println("reg-expr:[" + regExprStr + "]; str:[" + str + "] " + matches + "\t" + re2_matches + "\t" + found + "\t" + re2_found);
             }
-            assertEquals(matches, re2_matches);
-            assertEquals(found, re2_found);
+            if (matches != null) {
+                assertEquals(matches, re2_matches);
+            }
+            if (found != null) {
+                assertEquals(found, re2_found);
+            }
         }
         re2.dispoze();
     }
@@ -58,7 +155,8 @@ public class TestRandomExpr {
         class Worker implements Runnable {
             public void run() {
                 for (int i = 0; i < 2000; ++i) {
-                    runOneRandRE2(i);
+//                    runOneRandRE2(i);
+                    compareOneRandExpr(i);
                 }
             }
         }
