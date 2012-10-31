@@ -10,7 +10,9 @@ all: build
 build: $(OBJ)/libre2-java.so class
 
 .re2.download.stamp:
-	hg clone https://re2.googlecode.com/hg re2
+#	hg clone https://re2.googlecode.com/hg re2
+	wget http://re2.googlecode.com/files/re2-20121029.tgz -O re2.tgz
+	tar xvf re2.tgz
 	touch .re2.download.stamp
 
 .re2.compile.stamp: .re2.download.stamp
@@ -37,6 +39,7 @@ add-so: .re2.compile.stamp $(OBJ)/libre2-java.so
 
 clean:
 	rm -fr re2
+	rm -f re2.tgz
 	rm -fr obj
 	rm -fr target
 	rm -fr src/main/resources/NATIVE

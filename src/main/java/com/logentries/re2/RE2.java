@@ -46,6 +46,11 @@ public class RE2 /* implements AutoCloseable */ {
         dispoze();
     }
 
+    protected void finalize() throws Throwable {
+        dispoze();
+        super.finalize();
+    }
+
     static private int checkArg(final Object obj) throws IllegalArgumentException {
         if (obj instanceof int[]) {
             return ((int[])obj).length;
@@ -69,7 +74,7 @@ public class RE2 /* implements AutoCloseable */ {
         int length = 0;
         for (Object arg: args) {
             if ((length += checkArg(arg)) > 31) {
-                throw new IllegalArgumentException("Only up to 32 arguments supported");
+                throw new IllegalArgumentException("Only up to 31 arguments supported");
             }
         }
     }
