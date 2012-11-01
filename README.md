@@ -22,7 +22,7 @@ Simply type:
 
     $ make
 
-It downloads latest stable revision of re2, builds re2 library in separate directory and builds library with JNI bindigs too.
+It downloads latest stable revision of re2, builds re2 library in separate directory and builds another library with JNI bindigs as well.
 Finally, jar file that includes so libraries files is produced in the target folder.
 
 You can type:
@@ -32,6 +32,7 @@ You can type:
 to clean all files that come into existence during normal run of make.
 
 After seccessfull compilation you can run:
+
     $ mvn test
 
 But tests are very time and memory consuming and, at present, they print a lot of debug messages. Sorry if it is annoying,
@@ -45,7 +46,7 @@ startup, saved into temporary files and dynamically loaded into the address spac
 
 ## Usage ##
 
-For usage of the library, please import com.logentries.re2.RE2 and com.logentries.re2.Options .
+For usage of the library, please import `com.logentries.re2.RE2` and `com.logentries.re2.Options` .
 
 Basic usage of java-re2 is quite similar to the C++ library.
 
@@ -62,7 +63,7 @@ But it is usually bad idea to rely on Java GC. :-)
 
 Any try to use the object after the call of `dispoze()` or `close()` will cause the thrown of `IllegalStateException` .
 
-Precompiled RE supports member functions `partialMatch(.)` or `fullMatch(.).
+Precompiled RE supports member functions `partialMatch(.)` or `fullMatch(.)`.
 
     re.fullMatch("2569");
     re.partialMatch("xxx=2569");
@@ -90,10 +91,10 @@ So far, only int[], long[], float[], double[] and String[] are supported. Adding
 
 ### Little comment about interface and passing by reference ###
 
-I know that a lot of Java programmers may complain that the interfaced based on passing of parameters by reference through the trick with arrays
-is quite bad practise and that it introduces something what is not present in Java.
+I know that a lot of Java programmers may complain that the interface based on passing of parameters by reference through the trick with arrays
+is quite bad practise, dirty trick and that it introduces something what is in fact not present in Java.
 
-But after I try it in a real code I decided that it is the best way how to implement passing of submatches' values.
+But after I try it in a real code I decided that it is the best way how to pass values of submatches.
 If you have any idea how to implement it in different way, please give me know.
 
 ### Options  ###
@@ -106,6 +107,10 @@ It uses several setter methods to set the configuration value:
     Options opt = new Options();
     opt.setNeverNl(true);
     opt.setWordBoundary(false);
+
+or equivalently:
+
+    Options opt = new Options().setNeverNl(true).setWordBoundary(false);
 
 etc.
 
