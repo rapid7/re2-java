@@ -57,8 +57,9 @@ You can create precompiled RE in this way:
     RE2 re = new RE2("\\d+");
 
 as the object allocates some memory that is not under the control of JVM, it should be freed explicitly.
-You can either use member function `dispoze()`, or member function `close()` . It has own overloaded method
-`finalize()` and thus the memory will be freed before the object is destroyd by the Gerbage Collector.
+You can either use member function `dispoze()`, or member function `close()` .
+Class RE2 contains overloaded method `finalize()` that is automatically called before the object is destroyed by the Garbage Collector.
+This method ensures that the additional memory is freed and may be frees it on its own.
 But it is usually bad idea to rely on Java GC. :-)
 
 Any try to use the object after the call of `dispoze()` or `close()` will cause the thrown of `IllegalStateException` .
@@ -89,17 +90,17 @@ Array of length bigger then 1 can be used. Then it is used to store as much cons
 
 So far, only int[], long[], float[], double[] and String[] are supported. Adding of other types should be quite easy.
 
-### Little comment about interface and passing by reference ###
+### Little comment about the interface and passing by reference ###
 
 I know that a lot of Java programmers may complain that the interface based on passing of parameters by reference through the trick with arrays
 is quite bad practise, dirty trick and that it introduces something what is in fact not present in Java.
 
-But after I try it in a real code I decided that it is the best way how to pass values of submatches.
+But after I try it in a real code I decided that it is the best way to pass the values of submatches.
 If you have any idea how to implement it in different way, please give me know.
 
 ### Options  ###
 
-Object `com.logentries.re2.Options` encapsulates possible configuration used while creation of RE2 object and it should be more or less equivalent to RE2::Options
+Object `com.logentries.re2.Options` encapsulates possible configuration that is used during creation of the RE2 object. It is more or less equivalent to RE2::Options
 from C++ interface. It can be passed as a second argument to RE2 constructor.
 
 It uses several setter methods to set the configuration values:
