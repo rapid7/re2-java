@@ -85,7 +85,7 @@ Array of length bigger then 1 can be used. Then it is used to store as much cons
     String[] s = new String[1];
     long[] y = new long[3];
     new RE2 re = new RE2("(\\d+):(\\d+)-([a-zA-Z]+)-(\\d+):(\\d+):(\\d+)");
-    re.fullMatch("225:3-xxx-2:2555422298777:7");
+    re.fullMatch("225:3-xxx-2:2555422298777:7", x, s, y);
     // x[0] == 225, x[1] == 3, s[0] == xxx, y[0] == 2, y[1] == 2555422298777, y[2] == 7
 
 So far, only int[], long[], float[], double[] and String[] are supported. Adding of other types should be quite easy.
