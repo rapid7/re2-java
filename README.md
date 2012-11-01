@@ -99,10 +99,10 @@ If you have any idea how to implement it in different way, please give me know.
 
 ### Options  ###
 
-Object `com.logentries.re2.Options` encapsulates possible configuration values and should be more or less equivalent to RE2::Options
+Object `com.logentries.re2.Options` encapsulates possible configuration used while creation of RE2 object and it should be more or less equivalent to RE2::Options
 from C++ interface. It can be passed as a second argument to RE2 constructor.
 
-It uses several setter methods to set the configuration value:
+It uses several setter methods to set the configuration values:
 
     Options opt = new Options();
     opt.setNeverNl(true);
