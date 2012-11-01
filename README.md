@@ -120,5 +120,5 @@ C++ interface contains automatic conversion from some options to RE2::Options. F
 
 It cannot be done in Java, instead you should write:
 
-    RE2 re2 = new RE2("urobor+os", new Options().setQuiet(true));
+    RE2 re2 = new RE2("Ourobor+os", new Options().setQuiet(true));
     ...
