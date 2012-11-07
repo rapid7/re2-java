@@ -4,7 +4,7 @@ package com.logentries.re2;
 //import java.lang.AutoCloseable;
 
 public class RE2 /* implements AutoCloseable */ {
-    private static native long compileImpl(final String pattern, final Options options);
+    private static native long compileImpl(final String pattern, final Options options) throws RegExprException;
     private static native void releaseImpl(final long pointer);
     private static native boolean fullMatchImpl(final String str, final long pointer, Object ... args);
     private static native boolean partialMatchImpl(final String str, final long pointer, Object ... args);
@@ -20,10 +20,10 @@ public class RE2 /* implements AutoCloseable */ {
         }
     }
 
-    public RE2(final String pattern) {
+    public RE2(final String pattern) throws RegExprException {
         this(pattern, null);
     }
-    public RE2(final String pattern, final Options options) {
+    public RE2(final String pattern, final Options options) throws RegExprException {
         pointer = compileImpl(pattern, options);
     }
     static {

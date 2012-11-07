@@ -94,15 +94,32 @@ static bool is_empty_arr(JNIEnv *env, jarray j_arr) {
     
 }
 
+static bool throw_RegExprException(JNIEnv *env, const char *msg) {
+    const char *class_name = "com/logentries/re2/RegExprException" ;
+
+    jclass j_cls = env->FindClass(class_name);
+    if (j_cls == NULL) {
+        BOOST_VERIFY(!"Cannot find exception class :-(");
+    }
+
+    return env->ThrowNew(j_cls, msg) == 0;
+}
+
 JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2_compileImpl
   (JNIEnv *env, jclass cls, jstring j_str, jobject j_options) {
     Options options(env, j_options);
     const char *str = env->GetStringUTFChars(j_str, 0);
     RE2 *pointer = new RE2(str, options);
-    env->ReleaseStringUTFChars(j_str, str);
-    jlong j_pointer = reinterpret_cast<jlong>(pointer);
-    BOOST_VERIFY(reinterpret_cast<RE2*>(j_pointer) == pointer);
-    return j_pointer;
+    if (pointer->ok()) {
+        env->ReleaseStringUTFChars(j_str, str);
+        jlong j_pointer = reinterpret_cast<jlong>(pointer);
+        BOOST_VERIFY(reinterpret_cast<RE2*>(j_pointer) == pointer);
+        return j_pointer;
+    } else {
+        throw_RegExprException(env, pointer->error().c_str());
+        delete pointer;
+        return 0;
+    }
 }
 
 JNIEXPORT void JNICALL Java_com_logentries_re2_RE2_releaseImpl
