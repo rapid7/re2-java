@@ -5,10 +5,25 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import com.logentries.re2.RE2;
 import com.logentries.re2.Options;
+import com.logentries.re2.RegExprException;
 
 public class TestThreads {
+    private RE2 safeNewRE2(final String regExprStr, final Options options) {
+        try {
+            if (options == null) {
+                return new RE2(regExprStr);
+            } else {
+                return new RE2(regExprStr, options);
+            }
+        } catch (RegExprException e) {
+            System.err.println("Cannot construct re: [" + regExprStr + "] : " + e.getMessage());
+            fail("Unexpected error in RE");
+            return null;
+        }
+    }
     @Test
     public void testThreads() {
         class Worker implements Runnable {
@@ -19,14 +34,14 @@ public class TestThreads {
                 final boolean res2 = RE2.fullMatch("hello", "(h.*x)");
                 assertFalse(res2);
                 /* */
-                final RE2 re_x = new RE2("(h.*o)");
+                final RE2 re_x = safeNewRE2("(h.*o)", null);
                 assertNotNull(re_x);
                 final boolean res3 = re_x.fullMatch("hello");
                 assertTrue(res3);
                 final boolean res4 = re_x.fullMatch("hellx");
                 assertFalse(res4);
                 re_x.dispoze();
-                final RE2 re_y = new RE2("(h.*o)", new Options());
+                final RE2 re_y = safeNewRE2("(h.*o)", new Options());
                 assertNotNull(re_y);
                 re_y.dispoze();
                 /* */

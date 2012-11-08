@@ -5,8 +5,10 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import com.logentries.re2.RE2;
 import com.logentries.re2.Options;
+import com.logentries.re2.RegExprException;
 import java.util.List;
 import java.util.Arrays;
 
@@ -111,7 +113,13 @@ public class TestRandomExpr {
 
         Pattern pattern = Pattern.compile(regExprStr);
         System.err.println("\t+Pattern.compile()");
-        RE2 re2 = new RE2(regExprStr);
+        RE2 re2 = null;
+        try {
+            re2 = new RE2(regExprStr);
+        } catch (RegExprException e) {
+            System.err.println("Cannot construct re: [" + regExprStr + "] : " + e.getMessage());
+            fail("Unexpected error in RE");
+        }
         System.err.println("\t+new RE2()");
 
         for (int i = 0; i < 25; ++i) {
@@ -177,7 +185,14 @@ public class TestRandomExpr {
         final String regExprStr = genRegExpr.next();
         System.err.println("Runnig i = " + index + "\t" + regExprStr);
 
-        RE2 re2 = new RE2(regExprStr);
+        
+        RE2 re2 = null;
+        try {
+            new RE2(regExprStr);
+        } catch (RegExprException e) {
+            System.err.println("Cannot construct re: [" + regExprStr + "] : " + e.getMessage());
+            fail("Unexpected error in RE");
+        }
         System.err.println("\t+new RE2()");
 
         for (int i = 0; i < 25; ++i) {

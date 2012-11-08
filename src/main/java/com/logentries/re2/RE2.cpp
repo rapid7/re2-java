@@ -46,38 +46,43 @@ jobject get_j_encoding(JNIEnv *env, RE2::Options::Encoding enc) {
     BOOST_VERIFY(0);
 }
 
+static jfieldID get_field_id_safe(JNIEnv *env, jclass j_cls, const char *name, const char *sig) {
+    jfieldID fid = env->GetFieldID(j_cls, name, sig);
+    BOOST_VERIFY(fid != NULL);
+    return fid;
+}
 
 JNIEXPORT void JNICALL Java_com_logentries_re2_Options_setDefaults
   (JNIEnv *env, jobject j_this) {
     RE2::Options options;
     jclass j_cls = env->GetObjectClass(j_this);
-    env->SetObjectField(j_this, env->GetFieldID(j_cls, "encoding", "Lcom/logentries/re2/Encoding;"), get_j_encoding(env, options.encoding()));
-    env->SetBooleanField(j_this, env->GetFieldID(j_cls, "posixSyntax", "Z"), options.posix_syntax());
-    env->SetBooleanField(j_this, env->GetFieldID(j_cls, "longestMatch", "Z"), options.longest_match());
-    env->SetBooleanField(j_this, env->GetFieldID(j_cls, "logErrors", "Z"), options.log_errors());
-    env->SetLongField(j_this, env->GetFieldID(j_cls, "maxMem", "J"), safe_cast<jlong>(options.max_mem()));
-    env->SetBooleanField(j_this, env->GetFieldID(j_cls, "literal", "Z"), options.log_errors());
-    env->SetBooleanField(j_this, env->GetFieldID(j_cls, "neverNl", "Z"), options.log_errors());
-    env->SetBooleanField(j_this, env->GetFieldID(j_cls, "neverCapture", "Z"), options.log_errors());
-    env->SetBooleanField(j_this, env->GetFieldID(j_cls, "caseSensitive", "Z"), options.log_errors());
-    env->SetBooleanField(j_this, env->GetFieldID(j_cls, "perlClasses", "Z"), options.log_errors());
-    env->SetBooleanField(j_this, env->GetFieldID(j_cls, "wordBoundary", "Z"), options.log_errors());
+    env->SetObjectField(j_this, get_field_id_safe(env, j_cls, "encoding", "Lcom/logentries/re2/Encoding;"), get_j_encoding(env, options.encoding()));
+    env->SetBooleanField(j_this, get_field_id_safe(env, j_cls, "posixSyntax", "Z"), options.posix_syntax());
+    env->SetBooleanField(j_this, get_field_id_safe(env, j_cls, "longestMatch", "Z"), options.longest_match());
+    env->SetBooleanField(j_this, get_field_id_safe(env, j_cls, "logErrors", "Z"), options.log_errors());
+    env->SetLongField(j_this, get_field_id_safe(env, j_cls, "maxMem", "J"), safe_cast<jlong>(options.max_mem()));
+    env->SetBooleanField(j_this, get_field_id_safe(env, j_cls, "literal", "Z"), options.literal());
+    env->SetBooleanField(j_this, get_field_id_safe(env, j_cls, "neverNl", "Z"), options.never_nl());
+    env->SetBooleanField(j_this, get_field_id_safe(env, j_cls, "neverCapture", "Z"), options.never_capture());
+    env->SetBooleanField(j_this, get_field_id_safe(env, j_cls, "caseSensitive", "Z"), options.case_sensitive());
+    env->SetBooleanField(j_this, get_field_id_safe(env, j_cls, "perlClasses", "Z"), options.perl_classes());
+    env->SetBooleanField(j_this, get_field_id_safe(env, j_cls, "wordBoundary", "Z"), options.word_boundary());
 }
 
 static void cpy_options(RE2::Options &options, JNIEnv *env, jobject j_options) {
     BOOST_VERIFY(j_options != 0);
     jclass j_options_cls = env->GetObjectClass(j_options);
-    options.set_encoding(get_re2_encoding(env, env->GetObjectField(j_options, env->GetFieldID(j_options_cls, "encoding", "Lcom/logentries/re2/Encoding;"))));
-    options.set_posix_syntax(env->GetBooleanField(j_options, env->GetFieldID(j_options_cls, "posixSyntax", "Z")));
-    options.set_longest_match(env->GetBooleanField(j_options, env->GetFieldID(j_options_cls, "longestMatch", "Z")));
-    options.set_log_errors(env->GetBooleanField(j_options, env->GetFieldID(j_options_cls, "logErrors", "Z")));
-    options.set_max_mem(safe_cast<uint64_t>(env->GetLongField(j_options, env->GetFieldID(j_options_cls, "maxMem", "J"))));
-    options.set_literal(env->GetBooleanField(j_options, env->GetFieldID(j_options_cls, "literal", "Z")));
-    options.set_log_errors(env->GetBooleanField(j_options, env->GetFieldID(j_options_cls, "neverNl", "Z")));
-    options.set_never_capture(env->GetBooleanField(j_options, env->GetFieldID(j_options_cls, "neverCapture", "Z")));
-    options.set_case_sensitive(env->GetBooleanField(j_options, env->GetFieldID(j_options_cls, "caseSensitive", "Z")));
-    options.set_perl_classes(env->GetBooleanField(j_options, env->GetFieldID(j_options_cls, "perlClasses", "Z")));
-    options.set_word_boundary(env->GetBooleanField(j_options, env->GetFieldID(j_options_cls, "wordBoundary", "Z")));
+    options.set_encoding(get_re2_encoding(env, env->GetObjectField(j_options, get_field_id_safe(env, j_options_cls, "encoding", "Lcom/logentries/re2/Encoding;"))));
+    options.set_posix_syntax(env->GetBooleanField(j_options, get_field_id_safe(env, j_options_cls, "posixSyntax", "Z")));
+    options.set_longest_match(env->GetBooleanField(j_options, get_field_id_safe(env, j_options_cls, "longestMatch", "Z")));
+    options.set_log_errors(env->GetBooleanField(j_options, get_field_id_safe(env, j_options_cls, "logErrors", "Z")));
+    options.set_max_mem(safe_cast<uint64_t>(env->GetLongField(j_options, get_field_id_safe(env, j_options_cls, "maxMem", "J"))));
+    options.set_literal(env->GetBooleanField(j_options, get_field_id_safe(env, j_options_cls, "literal", "Z")));
+    options.set_never_nl(env->GetBooleanField(j_options, get_field_id_safe(env, j_options_cls, "neverNl", "Z")));
+    options.set_never_capture(env->GetBooleanField(j_options, get_field_id_safe(env, j_options_cls, "neverCapture", "Z")));
+    options.set_case_sensitive(env->GetBooleanField(j_options, get_field_id_safe(env, j_options_cls, "caseSensitive", "Z")));
+    options.set_perl_classes(env->GetBooleanField(j_options, get_field_id_safe(env, j_options_cls, "perlClasses", "Z")));
+    options.set_word_boundary(env->GetBooleanField(j_options, get_field_id_safe(env, j_options_cls, "wordBoundary", "Z")));
 }
 
 class Options : public RE2::Options {
