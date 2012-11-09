@@ -1,6 +1,6 @@
 package com.logentries.re2;
 
-public final class Options {
+public final class Options extends LibraryLoader {
     Encoding encoding;
     private boolean posixSyntax;
     private boolean longestMatch;
@@ -24,6 +24,10 @@ public final class Options {
         this.encoding = encoding;
         return this;
     }
+    public Options setPosixSyntax(final boolean posixSyntax) {
+        this.posixSyntax = posixSyntax;
+        return this;
+    }
     public Options setLongestMatch(final boolean longestMatch) {
         this.longestMatch = longestMatch;
         return this;
@@ -44,12 +48,16 @@ public final class Options {
         this.neverNl = neverNl;
         return this;
     }
-    public Options setCapture(final boolean neverCapture) {
+    public Options setNeverCapture(final boolean neverCapture) {
         this.neverCapture = neverCapture;
         return this;
     }
     public Options setCaseSensitive(final boolean caseSensitive) {
         this.caseSensitive = caseSensitive;
+        return this;
+    }
+    public Options setCaseInsensitive(final boolean caseInsensitive) {
+        this.caseSensitive = !caseInsensitive;
         return this;
     }
     public Options setPerlClasses(final boolean perlClasses) {

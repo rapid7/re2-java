@@ -3,7 +3,7 @@ package com.logentries.re2;
 // Note: AutoCloseable is available since Java 7 for support of try-with-resources statement
 //import java.lang.AutoCloseable;
 
-public class RE2 /* implements AutoCloseable */ {
+public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
     private static native long compileImpl(final String pattern, final Options options) throws RegExprException;
     private static native void releaseImpl(final long pointer);
     private static native boolean fullMatchImpl(final String str, final long pointer, Object ... args);
@@ -25,14 +25,6 @@ public class RE2 /* implements AutoCloseable */ {
     }
     public RE2(final String pattern, final Options options) throws RegExprException {
         pointer = compileImpl(pattern, options);
-    }
-    static {
-        if (!EmbeddedLibraryTools.LOADED_RE2) {
-            System.loadLibrary("re2");
-        }
-        if (!EmbeddedLibraryTools.LOADED_RE2_JAVA) {
-            System.loadLibrary("re2-java");
-        }
     }
 
     public void dispoze() {
