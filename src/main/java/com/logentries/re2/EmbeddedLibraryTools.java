@@ -19,9 +19,10 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class EmbeddedLibraryTools {
+    public static final boolean VERBOSE = false;
+
     public static final boolean LOADED_RE2;
     public static final boolean LOADED_RE2_JAVA;
-
     static {
         LOADED_RE2 = loadEmbeddedLibrary("libre2");
         LOADED_RE2_JAVA = LOADED_RE2 && loadEmbeddedLibrary("libre2-java");
@@ -48,7 +49,9 @@ public class EmbeddedLibraryTools {
         URL nativeLibraryUrl = null;
         // loop through extensions, stopping after finding first one
         for (String ext : allowedExtensions) {
-            System.err.println("Looking for native library: " + url.toString() + ext);
+            if (VERBOSE) {
+                System.err.println("Looking for native library: " + url.toString() + ext);
+            }
             nativeLibraryUrl = RE2.class.getResource(url.toString() + ext);
             if (nativeLibraryUrl != null)
                 break;

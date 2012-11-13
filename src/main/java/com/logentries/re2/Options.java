@@ -1,7 +1,7 @@
 package com.logentries.re2;
 
 public final class Options extends LibraryLoader {
-    Encoding encoding;
+    private Encoding encoding;
     private boolean posixSyntax;
     private boolean longestMatch;
     private boolean logErrors;
