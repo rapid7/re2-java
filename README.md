@@ -5,6 +5,11 @@ re2 for Java
 
 Warning: Only 64bit Linux is supported for now. It should be easy to add support for other platforms.
 
+## Licence ##
+
+Like [RE2 library](http://code.google.com/p/re2/) iteself, this library can be distributed and used under the terms of [The BSD 3-Clause License](http://opensource.org/licenses/BSD-3-Clause).
+
+
 ## Installation ##
 
 ### Requirements ###
