@@ -1,3 +1,10 @@
+/*
+ *      Java Bindings for the RE2 Library
+ *
+ *      (c) 2012 Daniel Fiala <danfiala@ucw.cz>
+ *
+ */
+
 #include <re2/re2.h>
 #include <boost/assert.hpp>
 #include <new>

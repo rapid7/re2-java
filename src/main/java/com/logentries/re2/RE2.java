@@ -1,3 +1,10 @@
+/*
+ *      Java Bindings for the RE2 Library
+ *
+ *      (c) 2012 Daniel Fiala <danfiala@ucw.cz>
+ *
+ */
+
 package com.logentries.re2;
 
 // Note: AutoCloseable is available since Java 7 for support of try-with-resources statement

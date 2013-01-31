@@ -1,3 +1,10 @@
+/*
+ *      Java Bindings for the RE2 Library
+ *
+ *      (c) 2012 Daniel Fiala <danfiala@ucw.cz>
+ *
+ */
+
 #ifndef COM_LOGENTRIES_RE2_OP_H
 #   define COM_LOGENTRIES_RE2_OP_H
 
