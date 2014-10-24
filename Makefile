@@ -31,7 +31,7 @@ class: build-class
 build-class: target/libre2-java-1.0-SNAPSHOT.jar
 
 target/libre2-java-1.0-SNAPSHOT.jar: add-so
-	$(MVN) package -Dmaven.test.skip=true
+	$(MVN) package
 
 add-so: .re2.compile.stamp $(OBJ)/libre2-java.so
 	mkdir -p $(NATIVES-TARGET)
