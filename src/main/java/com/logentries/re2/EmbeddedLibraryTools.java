@@ -26,10 +26,11 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class EmbeddedLibraryTools {
-    public static final boolean VERBOSE = true;
+    public static final boolean VERBOSE = false;
 
     public static final boolean LOADED_RE2;
     public static final boolean LOADED_RE2_JAVA;
+
     static {
         LOADED_RE2 = loadEmbeddedLibrary("libre2");
         LOADED_RE2_JAVA = LOADED_RE2 && loadEmbeddedLibrary("libre2-java");
@@ -46,7 +47,7 @@ public class EmbeddedLibraryTools {
     private static boolean loadEmbeddedLibrary(final String name) {
         // attempt to locate embedded native library within JAR at following location:
         // /NATIVE/${os.arch}/${os.name}/libre2{,-java}.[so|dylib|dll]
-        String[] allowedExtensions = new String[] {"so", "dylib", "dll", };
+        String[] allowedExtensions = new String[]{"so", "dylib", "dll",};
         StringBuilder url = new StringBuilder();
         url.append("/NATIVE/");
         url.append(getCurrentPlatformIdentifier());
@@ -63,33 +64,38 @@ public class EmbeddedLibraryTools {
             nativeLibraryUrl = RE2.class.getResource(url.toString() + ext);
             if (nativeLibraryUrl != null)
                 break;
+        }
+        //
+        if (nativeLibraryUrl != null) {
+            // native library found within JAR, extract and load
+            try {
+                final File libfile = File.createTempFile(name, ".lib");
+                libfile.deleteOnExit(); // just in case
+                //
+                final InputStream in = nativeLibraryUrl.openStream();
+                final OutputStream out = new BufferedOutputStream(new FileOutputStream(libfile));
+                //
+                int len = 0;
+                byte[] buffer = new byte[8192];
+                while ((len = in.read(buffer)) > -1)
+                    out.write(buffer, 0, len);
+                out.close();
+                in.close();
+                System.load(libfile.getAbsolutePath());
+                //do not delete the lib file now, in certain environments this
+                //may lead library loading to fail
+                //libfile.delete();
+                return true;
+            } catch (IOException x) {
+                if (VERBOSE) x.printStackTrace();
+                // mission failed, do nothing
             }
-            //
-            if (nativeLibraryUrl != null) {
-                // native library found within JAR, extract and load
-                try {
-                    final File libfile = File.createTempFile(name, ".lib");
-                    libfile.deleteOnExit(); // just in case
-                    //
-                    final InputStream in = nativeLibraryUrl.openStream();
-                    final OutputStream out = new BufferedOutputStream(new FileOutputStream(libfile));
-                    //
-                    int len = 0;
-                    byte[] buffer = new byte[8192];
-                    while ((len = in.read(buffer)) > -1)
-                        out.write(buffer, 0, len);
-                    out.close();
-                    in.close();
-                    System.load(libfile.getAbsolutePath());
-                    libfile.delete();
-                    return true;
-                } catch (IOException x) {
-                    x.printStackTrace();
-                    // mission failed, do nothing
-                }
         } // nativeLibraryUrl exists
         return false;
     }
 
-    private EmbeddedLibraryTools() {};
+    private EmbeddedLibraryTools() {
+    }
+
+    ;
 }
