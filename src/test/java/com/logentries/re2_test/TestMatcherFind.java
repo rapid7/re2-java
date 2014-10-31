@@ -1,5 +1,7 @@
 package com.logentries.re2_test;
 
+import com.logentries.re2.Encoding;
+import com.logentries.re2.Options;
 import com.logentries.re2.RE2;
 import com.logentries.re2.RE2Matcher;
 import org.junit.Test;
@@ -29,6 +31,16 @@ public class TestMatcherFind {
         assertEquals(-1, matcher.end(1));
         assertNull(matcher.group(1));
 
+    }
+    @Test
+    public void testFindNoGroups() throws Exception {
+
+        RE2 regex = new RE2("(www\\.)?dandelion\\.eu");
+
+        RE2Matcher matcher = regex.matcher("https://www.dandelion.eu/datatxt", false);
+        assertTrue(matcher.find());
+        assertEquals("www.dandelion.eu", matcher.group());
+        assertEquals(1, matcher.groupCount());
     }
 
     @Test
@@ -164,5 +176,14 @@ public class TestMatcherFind {
         RE2Matcher m = regex.matcher("input text");
         regex.close();
         m.find();
+    }
+
+    @Test
+    public void testOptionsList() throws Exception {
+        RE2 regex = new RE2("TGIF?",
+            Options.CASE_INSENSITIVE,
+            Options.ENCODING(Encoding.UTF8),
+            Options.PERL_CLASSES(false)
+        );
     }
 }

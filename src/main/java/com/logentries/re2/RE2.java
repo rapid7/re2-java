@@ -29,11 +29,13 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         return pointer == 0;
     }
 
-    public RE2(final String pattern) throws RegExprException {
-        this(pattern, null);
-    }
     public RE2(final String pattern, final Options options) throws RegExprException {
         pointer = compileImpl(pattern, options);
+    }
+    public RE2(final String pattern, final Options.Flag... options) throws RegExprException {
+        Options opt = new Options();
+        for (Options.Flag f : options) f.apply(opt);
+        pointer = compileImpl(pattern, opt);
     }
 
     public int numberOfCapturingGroups() {
@@ -108,7 +110,10 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
     }
 
     public RE2Matcher matcher(final String str) {
+        return matcher(str, true);
+    }
+    public RE2Matcher matcher(final String str, boolean fetchGroups) {
         checkState();
-        return new RE2Matcher(str, this, pointer);
+        return new RE2Matcher(str, this, pointer, fetchGroups);
     }
 }

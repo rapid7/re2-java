@@ -258,12 +258,11 @@ JNIEXPORT void JNICALL Java_com_logentries_re2_RE2Matcher_releaseStringBuffer
 }
 
 JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2Matcher_findImpl
-  (JNIEnv *env, jclass cls, jobject matcher, jlong re2_pointer, jlong str_pointer, jint start, jint end) {
+  (JNIEnv *env, jclass cls, jobject matcher, jlong re2_pointer, jlong str_pointer, jint ngroups, jint start, jint end) {
 
-  RE2 *regex = reinterpret_cast<RE2*>(re2_pointer);
-  char *str = reinterpret_cast<char*>(str_pointer);
+    RE2 *regex = reinterpret_cast<RE2*>(re2_pointer);
+    char *str = reinterpret_cast<char*>(str_pointer);
 
-    int ngroups = regex->NumberOfCapturingGroups()+1;
     StringPiece* groups = new StringPiece[ngroups];
     StringPiece text(str);
     const bool res = regex->Match(text, start, end, RE2::UNANCHORED, groups, ngroups);

@@ -170,14 +170,12 @@ or equivalently:
 
     Options opt = new Options().setNeverNl(true).setWordBoundary(false);
 
-etc.
+`RE2` constructor is now overloaded to support for explicit flag list, to mimic C++ style:
 
-C++ interface contains automatic conversion from some options to RE2::Options. For example you can write (in C++):
+        RE2 regex = new RE2("TGIF?",
+            Options.CASE_INSENSITIVE,
+            Options.ENCODING(Encoding.UTF8),
+            Options.PERL_CLASSES(false)
+        );
 
-    RE2 re("(ab", RE2::Quiet);
-
-It cannot be done in Java, instead you should write:
-
-    RE2 re2 = new RE2("Ourobor+os", new Options().setQuiet(true));
-    ...
-
+ see `Options` static fields for further details.

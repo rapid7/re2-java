@@ -13,6 +13,7 @@ public class RE2Matcher implements MatchResult, AutoCloseable, Iterable<MatchRes
         final Object matcher,
         final long re2_pointer,
         final long str_pointer,
+        final int fetch_groups,
         final int start,
         final int end
     );
@@ -72,8 +73,9 @@ public class RE2Matcher implements MatchResult, AutoCloseable, Iterable<MatchRes
     private RE2 regex;
     private UTF8StringOffset utf8Offset;
     private boolean matched;
+    private boolean fetchGroups;
 
-    RE2Matcher(String input, RE2 regex, long re2Pointer) {
+    RE2Matcher(String input, RE2 regex, long re2Pointer, boolean fetchGroups) {
         this.input = input;
         this.matched = false;
         this.groups = new ArrayList<>(regex.numberOfCapturingGroups() + 1);
@@ -81,6 +83,7 @@ public class RE2Matcher implements MatchResult, AutoCloseable, Iterable<MatchRes
         this.utf8Offset = new UTF8StringOffset(input);
         this.re2Pointer = re2Pointer;
         this.regex = regex; //to avoid that re2Pointer could be garbaged
+        this.fetchGroups = fetchGroups;
     }
 
     private void free() {
@@ -123,7 +126,8 @@ public class RE2Matcher implements MatchResult, AutoCloseable, Iterable<MatchRes
 
         start = utf8Offset.fromStringToByte(start);
         end = utf8Offset.fromStringToByte(end);
-        return matched = findImpl(this, re2Pointer, utf8StringPointer, start, end);
+        int ngroups = fetchGroups ? regex.numberOfCapturingGroups() + 1 : 1;
+        return matched = findImpl(this, re2Pointer, utf8StringPointer, ngroups, start, end);
     }
 
     private void checkGroup(int group) {
