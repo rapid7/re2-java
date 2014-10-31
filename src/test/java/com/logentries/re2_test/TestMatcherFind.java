@@ -186,4 +186,21 @@ public class TestMatcherFind {
             Options.PERL_CLASSES(false)
         );
     }
+
+    @Test
+    public void testMoreGroups() throws Exception {
+        String pattern = "";
+        char c = 'a';
+        for (int i=0; i<25; i++) {
+            char cnext = (char)(c+i);
+            if (i>0) pattern += "|("+cnext+")";
+            else pattern += "("+ cnext +")";
+        }
+
+        RE2Matcher matcher = new RE2(pattern).matcher("a very beatiful string");
+        assertTrue(matcher.findNext()); //a
+        assertTrue(matcher.findNext()); //v
+        assertEquals("v", matcher.group());
+        assertEquals("v", matcher.group( 'v'-'a' + 1 ));
+    }
 }

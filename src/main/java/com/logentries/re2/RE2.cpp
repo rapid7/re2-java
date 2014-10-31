@@ -257,13 +257,26 @@ JNIEXPORT void JNICALL Java_com_logentries_re2_RE2Matcher_releaseStringBuffer
     env->ReleaseStringUTFChars(input, pointer);
 }
 
+static const int stackSize = 16 + 1; // see 'kVecSize' in re2.cc
+
 JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2Matcher_findImpl
   (JNIEnv *env, jclass cls, jobject matcher, jlong re2_pointer, jlong str_pointer, jint ngroups, jint start, jint end) {
+
 
     RE2 *regex = reinterpret_cast<RE2*>(re2_pointer);
     char *str = reinterpret_cast<char*>(str_pointer);
 
-    StringPiece* groups = new StringPiece[ngroups];
+    StringPiece* groups;
+    StringPiece stackgroups[stackSize];
+    StringPiece* heapgroups = NULL;
+
+    if (ngroups <= stackSize) {
+        groups = stackgroups;
+    } else {
+        groups = new StringPiece[ngroups];
+        heapgroups = groups;
+    }
+
     StringPiece text(str);
     const bool res = regex->Match(text, start, end, RE2::UNANCHORED, groups, ngroups);
     if (res) {
@@ -285,7 +298,7 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2Matcher_findImpl
         }
     }
 
-    delete[] groups;
+    delete[] heapgroups;
     return static_cast<jboolean>(res);
 }
 

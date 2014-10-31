@@ -111,6 +111,18 @@ This can be very useful when playing with this library in Scala:
 
     new RE2("abc?") matcher "abc and abc ab ab" map( _.group ) foreach println
 
+If you are not interested in fetching groups offset you can disable this feature, by using
+
+    RE2Matcher m = new RE2("ab(c?)").matcher("abc and abc ab ab", false);
+    assertEquals(1, m.GroupCount());
+    // now m contains information only for group 0
+    // so m.start(), m.end() and m.group()
+    // trying m.{start|end|group}(n : n > 0) always fails
+
+If your regex is very complex (most likely programmatically composed by concatenating different patterns) and the
+number of groups is huge, this can improve performance significantly (data structures to contain all possible matches
+are not allocated).
+
 **NOTE 1**: `RE2Matcher` object maintains a pointer to a char buffer that is used in C++ stack to manage the current string, in order to avoid a copy for each iteration.
 For this reason, `RE2Matcher` object implements AutoCloseable interface, to be used in `try-with-resource` statement.
 Close method is called in `finalize()`, so garbage collector will ensure (sooner or later) to free the memory. This is the same pattern that has been used for
