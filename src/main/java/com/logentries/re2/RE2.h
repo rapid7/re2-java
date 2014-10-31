@@ -55,6 +55,39 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_fullMatchImpl__Ljava_lang
 JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_lang_String_2Ljava_lang_String_2_3Ljava_lang_Object_2
   (JNIEnv *, jclass, jstring, jstring, jobjectArray);
 
+/*
+ * Class:     com_logentries_re2_RE2
+ * Method:    numberOfCapturingGroupsImpl
+ * Signature: (J)I
+ */
+JNIEXPORT jint JNICALL Java_com_logentries_re2_RE2_numberOfCapturingGroupsImpl
+  (JNIEnv *, jclass, jlong);
+
+
+/*
+ * Class:     com_logentries_re2_RE2Matcher
+ * Method:    createStringBuffer
+ * Signature: (Ljava/lang/String;)J
+ */
+JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2Matcher_createStringBuffer
+  (JNIEnv *, jclass, jstring);
+
+/*
+ * Class:     com_logentries_re2_RE2Matcher
+ * Method:    releaseStringBuffer
+ * Signature: (Ljava/lang/String;J)V
+ */
+JNIEXPORT void JNICALL Java_com_logentries_re2_RE2Matcher_releaseStringBuffer
+  (JNIEnv *, jclass, jstring, jlong);
+
+
+/*
+ * Class:     com_logentries_re2_RE2Matcher
+ * Method:    findImpl
+ * Signature: (Ljava/lang/Object;JJII)Z
+ */
+JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2Matcher_findImpl
+  (JNIEnv *, jclass, jobject, jlong, jlong, jint, jint);
 #ifdef __cplusplus
 }
 #endif

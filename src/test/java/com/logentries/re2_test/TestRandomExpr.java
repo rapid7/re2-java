@@ -1,18 +1,15 @@
 package com.logentries.re2_test;
 
-import org.junit.Test;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.fail;
 import com.logentries.re2.RE2;
-import com.logentries.re2.Options;
 import com.logentries.re2.RegExprException;
-import java.util.List;
-import java.util.Arrays;
+import org.junit.Test;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.regex.Pattern;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class TestRandomExpr {
     private static class InterruptibleCharSequence implements CharSequence {

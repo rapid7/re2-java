@@ -7,10 +7,7 @@
 
 package com.logentries.re2;
 
-// Note: AutoCloseable is available since Java 7 for support of try-with-resources statement
-//import java.lang.AutoCloseable;
-
-public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
+public final class RE2 extends LibraryLoader implements AutoCloseable {
     private static native long compileImpl(final String pattern, final Options options) throws RegExprException;
     private static native void releaseImpl(final long pointer);
     private static native boolean fullMatchImpl(final String str, final long pointer, Object ... args);
@@ -19,6 +16,8 @@ public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
     private static native boolean fullMatchImpl(final String str, final String pattern, Object ... args);
     private static native boolean partialMatchImpl(final String str, final String pattern, Object ... args);
 
+    private static native int numberOfCapturingGroupsImpl(final long pointer);
+
     private long pointer;
 
     private void checkState() throws IllegalStateException {
@@ -26,12 +25,20 @@ public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
             throw new IllegalStateException();
         }
     }
+    boolean isClosed() {
+        return pointer == 0;
+    }
 
     public RE2(final String pattern) throws RegExprException {
         this(pattern, null);
     }
     public RE2(final String pattern, final Options options) throws RegExprException {
         pointer = compileImpl(pattern, options);
+    }
+
+    public int numberOfCapturingGroups() {
+        checkState();
+        return numberOfCapturingGroupsImpl(pointer);
     }
 
     public void dispoze() {
@@ -98,5 +105,10 @@ public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
         checkState();
         checkArgs(args);
         return partialMatchImpl(str, pointer, args);
+    }
+
+    public RE2Matcher matcher(final String str) {
+        checkState();
+        return new RE2Matcher(str, this, pointer);
     }
 }

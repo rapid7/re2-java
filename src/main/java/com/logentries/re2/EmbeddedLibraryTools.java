@@ -26,7 +26,7 @@ import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
 public class EmbeddedLibraryTools {
-    public static final boolean VERBOSE = false;
+    public static final boolean VERBOSE = Boolean.parseBoolean(System.getProperty("verbose","false"));
 
     public static final boolean LOADED_RE2;
     public static final boolean LOADED_RE2_JAVA;
@@ -55,7 +55,7 @@ public class EmbeddedLibraryTools {
         url.append(name);
         url.append('.');
         URL nativeLibraryUrl = null;
-        System.out.println(url.toString());
+        //System.out.println(url.toString());
         // loop through extensions, stopping after finding first one
         for (String ext : allowedExtensions) {
             if (VERBOSE) {
@@ -84,6 +84,8 @@ public class EmbeddedLibraryTools {
                 System.load(libfile.getAbsolutePath());
                 //do not delete the lib file now, in certain environments this
                 //may lead library loading to fail
+                if (VERBOSE) System.out.println("Loaded "+nativeLibraryUrl.toString());
+
                 //libfile.delete();
                 return true;
             } catch (IOException x) {
