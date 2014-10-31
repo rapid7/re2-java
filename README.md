@@ -81,7 +81,8 @@ Precompiled RE supports member functions `partialMatch(.)` or `fullMatch(.)`.
     RE2Matcher matcher = re.matcher("my input string");
     if (matcher.find()) {
       // get matching string(s),
-      // see java.util.regex.Matcher javadoc or com.logentries.re2.RE2Matcher code for additional details
+      // see java.util.regex.Matcher javadoc or
+      // com.logentries.re2.RE2Matcher code for additional details
       // eg. matcher.group(<n>) or matcher.start(<n>) and matcher.end(<n>)
       ...
     }
@@ -110,7 +111,7 @@ This can be very useful when playing with this library in Scala:
 
     new RE2("abc?") matcher "abc and abc ab ab" map( _.group ) foreach println
 
-**NOTE**: `RE2Matcher` object maintains a pointer to a char buffer that is used in C++ stack to manage the current string, in order to avoid a copy for each iteration.
+**NOTE 1**: `RE2Matcher` object maintains a pointer to a char buffer that is used in C++ stack to manage the current string, in order to avoid a copy for each iteration.
 For this reason, `RE2Matcher` object implements AutoCloseable interface, to be used in `try-with-resource` statement.
 Close method is called in `finalize()`, so garbage collector will ensure (sooner or later) to free the memory. This is the same pattern that has been used for
 `RE2` object, but, usually, `RE2` regex are compiled and then used multiple times while `RE2Matcher` objects
@@ -120,6 +121,8 @@ In this case, you can use the `try-with-resource` block to make sure you don't m
     try (RE2Matcher matcher = re.matcher("my bla input string bl bla")) {
       matcher. ....
     }
+
+**NOTE 2**: `RE2Matcher` is not thread-safe, just like `java.util.regex.Matcher`
 
 ### Submatch extraction ###
 
@@ -148,9 +151,7 @@ I know that a lot of Java programmers may complain that the interface based on p
 is quite bad practise, dirty trick and that it introduces something what is in fact not present in Java.
 
 But after I try it in a real code I decided that it is the best way to pass the values of submatches.
-~~If you have any idea how to implement it in different way, please give me know.~~
-
-*See Matcher interface above*
+~~If you have any idea how to implement it in different way, please give me know.~~ *See Matcher interface above*
 
 
 
