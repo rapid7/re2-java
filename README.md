@@ -13,8 +13,7 @@ Like [RE2 library](http://code.google.com/p/re2/) iteself, this library can be d
 ## Installation ##
 
 ### Requirements ###
-* Java 6 (JDK 1.6) or higher. Set environment variable `JAVA_HOME` to point to the root directory of JDK.
-  I really like try-with-resources statement from Java 7, but on the other hand, Java 7 seems not to be stable enough so far.
+* Java 7 (JDK 1.7, never tested on Java 8). Set environment variable `JAVA_HOME` to point to the root directory of JDK.
 * Maven 3.x , http://maven.apache.org/ .
 - Check that mvn command can be run from your command line.
 * gcc 4.5.x or higher.
@@ -74,6 +73,54 @@ Precompiled RE supports member functions `partialMatch(.)` or `fullMatch(.)`.
     re.fullMatch("2569");
     re.partialMatch("xxx=2569");
 
+### Matcher ###
+
+`RE2` object supports also a more javaesque interface, similar to `java.util.regex.Pattern` and `java.util.regex.Matcher`.
+
+    RE2 re = new RE2("..(..)");
+    RE2Matcher matcher = re.matcher("my input string");
+    if (matcher.find()) {
+      // get matching string(s),
+      // see java.util.regex.Matcher javadoc or com.logentries.re2.RE2Matcher code for additional details
+      // eg. matcher.group(<n>) or matcher.start(<n>) and matcher.end(<n>)
+      ...
+    }
+
+You can also iterate over the input string searching for repeated pattern
+
+    RE2 re = new RE2("bla?");
+    RE2Matcher matcher = re.matcher("my bla input string bl bla");
+    while (matcher.findNext()) {
+      // 3 iterations, get positions using matcher.start() and matcher.end()
+    }
+
+`R2Matcher` also implements `java.util.Iterable<java.util.regex.MatchResult>`.
+It can be used this way
+
+    int c = 0;
+    for (MatchResult mr : new RE2("t").matcher("input text")) {
+        // play with matches using mr.start, mr.end, mr.group
+    }
+    assertEquals(3, c);
+
+This can be very useful when playing with this library in Scala:
+
+    import scala.collection.JavaConversions._
+    import com.logentries.re2._
+
+    new RE2("abc?") matcher "abc and abc ab ab" map( _.group ) foreach println
+
+**NOTE**: `RE2Matcher` object maintains a pointer to a char buffer that is used in C++ stack to manage the current string, in order to avoid a copy for each iteration.
+For this reason, `RE2Matcher` object implements AutoCloseable interface, to be used in `try-with-resource` statement.
+Close method is called in `finalize()`, so garbage collector will ensure (sooner or later) to free the memory. This is the same pattern that has been used for
+`RE2` object, but, usually, `RE2` regex are compiled and then used multiple times while `RE2Matcher` objects
+are used in stack and most likely you will want to delete it as soon as has been used.
+In this case, you can use the `try-with-resource` block to make sure you don't miss anything
+
+    try (RE2Matcher matcher = re.matcher("my bla input string bl bla")) {
+      matcher. ....
+    }
+
 ### Submatch extraction ###
 
 Both static and member match functions support additional parameters in which submatches will be stored.
@@ -101,7 +148,11 @@ I know that a lot of Java programmers may complain that the interface based on p
 is quite bad practise, dirty trick and that it introduces something what is in fact not present in Java.
 
 But after I try it in a real code I decided that it is the best way to pass the values of submatches.
-If you have any idea how to implement it in different way, please give me know.
+~~If you have any idea how to implement it in different way, please give me know.~~
+
+*See Matcher interface above*
+
+
 
 ### Options  ###
 
@@ -128,3 +179,4 @@ It cannot be done in Java, instead you should write:
 
     RE2 re2 = new RE2("Ourobor+os", new Options().setQuiet(true));
     ...
+

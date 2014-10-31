@@ -3,6 +3,9 @@ package com.logentries.re2_test;
 import com.logentries.re2.RE2;
 import com.logentries.re2.RE2Matcher;
 import org.junit.Test;
+
+import java.util.regex.MatchResult;
+
 import static org.junit.Assert.*;
 
 
@@ -127,13 +130,33 @@ public class TestMatcherFind {
         assertFalse(regex.matcher("€").find());
     }
 
+    @Test()
+    public void testIterator() throws Exception {
+        int c = 0;
+        for (MatchResult mr : new RE2("t").matcher("input text")) c++;
+        assertEquals(3, c);
+    }
+
+
+
     @Test(expected = IllegalStateException.class)
     public void testClosed() throws Exception {
         RE2Matcher m = new RE2("test").matcher("input text");
         m.close();
-
         m.find();
     }
+
+    @Test()
+    public void testTryWith() throws Exception {
+        RE2 r = new RE2("t");
+        try (RE2Matcher m = r.matcher("input text")) {
+            assertTrue(m.findNext());
+            assertTrue(m.findNext());
+            assertTrue(m.findNext());
+            assertFalse(m.findNext());
+        }
+    }
+
 
     @Test(expected = IllegalStateException.class)
     public void testReClosed() throws Exception {

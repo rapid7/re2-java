@@ -1,9 +1,11 @@
 package com.logentries.re2;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.NoSuchElementException;
 import java.util.regex.MatchResult;
 
-public class RE2Matcher implements MatchResult, AutoCloseable {
+public class RE2Matcher implements MatchResult, AutoCloseable, Iterable<MatchResult> {
 
     private static native long createStringBuffer(final String input);
     private static native void releaseStringBuffer(final String input, final long pointer);
@@ -14,6 +16,35 @@ public class RE2Matcher implements MatchResult, AutoCloseable {
         final int start,
         final int end
     );
+
+    @Override
+    public Iterator<MatchResult> iterator() {
+
+        return new Iterator<MatchResult>() {
+            boolean moved = false;
+            boolean hasnext = false;
+            @Override
+            public boolean hasNext() {
+                if (!moved) {
+                    hasnext = findNext();
+                    moved = true;
+                }
+                return hasnext;
+            }
+            @Override
+            public MatchResult next() {
+                if (hasNext()) {
+                    moved = false;
+                    return RE2Matcher.this;
+                } else
+                    throw new NoSuchElementException();
+            }
+            @Override
+            public void remove() {
+                throw new UnsupportedOperationException();
+            }
+        };
+    }
 
     static class Range {
         int start, end;
