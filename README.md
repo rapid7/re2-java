@@ -48,6 +48,22 @@ After running of `make`, directory `target` contains jar file with the library. 
 Native library files (libre2.so and libre2-java.so) are part of the jar file as well. They are extracted after JVM
 startup, saved into temporary files and dynamically loaded into the address space of the JVM.
 
+### Changelog ###
+
+#### v1.2
+
+  - added `RE2.compile` static method, similar to `Pattern.compile`. The main difference with the `RE2` constructor
+  is that `compile` method doesn't use checked exception and you can avoid `try/catch` block.
+
+  - support for `RE2String` that can be reused with multiple patterns, in order to avoid multiple copies of the same string.
+
+  - generalization of `RE2.matcher` that now accepts `CharSequence` rather than `String`
+
+#### v1.1
+
+ - support for `RE2Matcher`
+
+
 ## Usage ##
 
 For usage of the library, please import `com.logentries.re2.RE2` and `com.logentries.re2.Options` .
@@ -72,6 +88,14 @@ Precompiled RE supports member functions `partialMatch(.)` or `fullMatch(.)`.
 
     re.fullMatch("2569");
     re.partialMatch("xxx=2569");
+
+`RE2` constructor is declared with checked exception that can be raised if the regex is malformed. This is quite annoying if
+the regex is a static variable instantiated at startup. You can then use static method `RE2.compile` that wraps checked exception
+to the unchecked `IllegalArgumentException`.
+
+    public class MyClass {
+        private static RE2 regex = RE2.compile("...");
+    }
 
 ### Matcher ###
 
@@ -135,6 +159,38 @@ In this case, you can use the `try-with-resource` block to make sure you don't m
     }
 
 **NOTE 2**: `RE2Matcher` is not thread-safe, just like `java.util.regex.Matcher`
+
+### Re-using strings ###
+
+Whenever a `RE2Matcher` is created, the content of the string is copied to make it accessible from C++ stack. If you have to
+check and search for several patterns on the same string, this could affect performances, because you are copying
+the same string multiple times.
+
+For this reason, from version v1.2, we have implemented a new object, `RE2String` that is a wrapper for a `CharSequence`.
+You can create an instance of this object in advance, and then create a `RE2Matcher` using your `RE2String`. This new object
+can be re-used multiple times to create matchers for different patterns.
+When `RE2Matcher` is created using a `RE2String`, it doesn't copy the string and when you close it (see above about the `AutoCloseable` interface)
+simply does nothing. Similarly, `RE2String` implements `AutoCloseable` interface and `finalize` method has been overridden to let the GC
+clean resources for you.
+
+
+    RE2 regex1 = RE2.compile("\\b[\\d]{5}\\b");
+    RE2 regex2 = RE2.compile("\\b[a-zA-Z]{5}\\b");
+
+    String input = ....
+    RE2String rstring = new RE2String(input);
+
+    RE2Matcher m1 = regex1.matcher(rstring);
+    RE2Matcher m2 = regex2.matcher(rstring);
+    while(m1.find()) {
+        int endFirst = m1.end();
+        if (m2.find(endFirst, endFirst + 10)) {
+            ...
+        }
+    }
+
+    // here m1.close() and m2.close() do nothing
+
 
 ### Submatch extraction ###
 

@@ -124,6 +124,9 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         checkState();
         return new RE2Matcher(str, this, pointer, fetchGroups);
     }
+    public RE2Matcher matcher(final RE2String str) {
+        return matcher(str, true);
+    }
     public RE2Matcher matcher(final RE2String str, boolean fetchGroups) {
         checkState();
         return new RE2Matcher(str, this, pointer, fetchGroups);
