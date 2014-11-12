@@ -38,6 +38,14 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         pointer = compileImpl(pattern, opt);
     }
 
+    public static RE2 compile(final String pattern, final Options.Flag... options) {
+        try {
+            return new RE2(pattern, options);
+        } catch (RegExprException ree) {
+            throw new IllegalArgumentException(ree);
+        }
+    }
+
     public int numberOfCapturingGroups() {
         checkState();
         return numberOfCapturingGroupsImpl(pointer);
@@ -109,11 +117,16 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         return partialMatchImpl(str, pointer, args);
     }
 
-    public RE2Matcher matcher(final String str) {
+    public RE2Matcher matcher(final CharSequence str) {
         return matcher(str, true);
     }
-    public RE2Matcher matcher(final String str, boolean fetchGroups) {
+    public RE2Matcher matcher(final CharSequence str, boolean fetchGroups) {
         checkState();
         return new RE2Matcher(str, this, pointer, fetchGroups);
     }
+    public RE2Matcher matcher(final RE2String str, boolean fetchGroups) {
+        checkState();
+        return new RE2Matcher(str, this, pointer, fetchGroups);
+    }
+
 }

@@ -69,7 +69,7 @@ JNIEXPORT jint JNICALL Java_com_logentries_re2_RE2_numberOfCapturingGroupsImpl
  * Method:    createStringBuffer
  * Signature: (Ljava/lang/String;)J
  */
-JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2Matcher_createStringBuffer
+JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2String_createStringBuffer
   (JNIEnv *, jclass, jstring);
 
 /*
@@ -77,7 +77,7 @@ JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2Matcher_createStringBuffer
  * Method:    releaseStringBuffer
  * Signature: (Ljava/lang/String;J)V
  */
-JNIEXPORT void JNICALL Java_com_logentries_re2_RE2Matcher_releaseStringBuffer
+JNIEXPORT void JNICALL Java_com_logentries_re2_RE2String_releaseStringBuffer
   (JNIEnv *, jclass, jstring, jlong);
 
 

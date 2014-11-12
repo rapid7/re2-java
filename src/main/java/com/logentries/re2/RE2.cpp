@@ -245,13 +245,13 @@ JNIEXPORT jint JNICALL Java_com_logentries_re2_RE2_numberOfCapturingGroupsImpl
 }
 
 
-JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2Matcher_createStringBuffer
+JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2String_createStringBuffer
   (JNIEnv *env, jclass cls, jstring input) {
     const char *str = env->GetStringUTFChars(input, 0);
     return reinterpret_cast<jlong>(str);
 }
 
-JNIEXPORT void JNICALL Java_com_logentries_re2_RE2Matcher_releaseStringBuffer
+JNIEXPORT void JNICALL Java_com_logentries_re2_RE2String_releaseStringBuffer
   (JNIEnv *env, jclass cls, jstring input, jlong j_pointer) {
     char *pointer = reinterpret_cast<char*>(j_pointer);
     env->ReleaseStringUTFChars(input, pointer);
