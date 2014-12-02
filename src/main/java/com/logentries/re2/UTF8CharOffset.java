@@ -23,20 +23,19 @@ public class UTF8CharOffset {
             if (c < 128) slop = 1;
             else if (c < 2048) slop = 2;
             else if (Character.isSurrogate(c)) {
+                char2byte[i] = byteSize;
                 i++;
                 slop = 4;
             } else {
                 slop = 3;
             }
+            char2byte[i] = byteSize;
 
             if (byte2char.length - byteSize < slop) {
                 int [] newbie = new int[Math.max(byte2char.length * 2, slop)]; //if slop=3 and length=1 ... e.g. "€"
                 System.arraycopy(byte2char,0,newbie,0, byteSize);
                 byte2char = newbie;
             }
-
-            char2byte[i] = byteSize;
-
             int strPos = byteSize ==0 ? 0 : byte2char[byteSize -1] + 1;
             for (int k = 0; k < slop; k++) byte2char[byteSize+k] = strPos;
             byteSize += slop;

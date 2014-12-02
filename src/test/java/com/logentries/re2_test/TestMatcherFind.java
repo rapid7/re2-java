@@ -120,6 +120,7 @@ public class TestMatcherFind {
             "Dàtàtxt: https://dandelion.eu/datatxt - ", //offset 2
             "D€t€t€€: https://dandelion.eu/datatxt - ", //offset 3
             "D\uD801\uDC28t\uD801\uDC28t\uD801\uDC28€: https://dandelion.eu/datatxt - ", //surrogate
+            "D\uD83D\uDC3Et\uD83D\uDC3Et\uD83D\uDC3E€: https://dandelion.eu/datatxt - ", //surrogate
             "€€€€€€€: https://dandelion.eu/datatxt €€€", //offset 3
         };
 
