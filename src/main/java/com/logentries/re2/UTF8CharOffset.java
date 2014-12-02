@@ -15,6 +15,7 @@ public class UTF8CharOffset {
         charSize = input.length();
         byte2char = new int[(int)(input.length() * AVG_BYTE_PER_CHAR)];
         byteSize = 0;
+        boolean wasSurrogate = false;
         for (int i=0; i<input.length(); i++) {
 
             char c = input.charAt(i);
@@ -37,9 +38,10 @@ public class UTF8CharOffset {
                 byte2char = newbie;
             }
             int strPos = byteSize ==0 ? 0 : byte2char[byteSize -1] + 1;
+            if (wasSurrogate) strPos++;
             for (int k = 0; k < slop; k++) byte2char[byteSize+k] = strPos;
             byteSize += slop;
-
+            wasSurrogate = slop == 4;
         }
         
     }
