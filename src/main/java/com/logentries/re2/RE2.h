@@ -65,20 +65,20 @@ JNIEXPORT jint JNICALL Java_com_logentries_re2_RE2_numberOfCapturingGroupsImpl
 
 
 /*
- * Class:     com_logentries_re2_RE2Matcher
+ * Class:     com_logentries_re2_RE2String
  * Method:    createStringBuffer
- * Signature: (Ljava/lang/String;)J
+ * Signature: ([B)J
  */
 JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2String_createStringBuffer
-  (JNIEnv *, jclass, jstring);
+  (JNIEnv *, jclass, jbyteArray);
 
 /*
- * Class:     com_logentries_re2_RE2Matcher
+ * Class:     com_logentries_re2_RE2String
  * Method:    releaseStringBuffer
- * Signature: (Ljava/lang/String;J)V
+ * Signature: ([BJ)V
  */
 JNIEXPORT void JNICALL Java_com_logentries_re2_RE2String_releaseStringBuffer
-  (JNIEnv *, jclass, jstring, jlong);
+  (JNIEnv *, jclass, jbyteArray, jlong);
 
 
 /*

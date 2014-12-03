@@ -1,11 +1,9 @@
 package com.logentries.re2_test;
 
-import com.logentries.re2.Encoding;
-import com.logentries.re2.Options;
-import com.logentries.re2.RE2;
-import com.logentries.re2.RE2Matcher;
+import com.logentries.re2.*;
 import org.junit.Test;
 
+import java.util.Arrays;
 import java.util.regex.MatchResult;
 
 import static org.junit.Assert.*;
@@ -114,18 +112,16 @@ public class TestMatcherFind {
     @Test
     public void testOffsetSpecialChars() throws Exception {
 
-        RE2 regex = new RE2("(www\\.)?dandelion\\.eu");
+        RE2 regex = new RE2("dandelion\\.eu");
 
         String[] input = {
             "Dàtàtxt: https://dandelion.eu/datatxt - ", //offset 2
             "D€t€t€€: https://dandelion.eu/datatxt - ", //offset 3
-            "D\uD801\uDC28t\uD801\uDC28t\uD801\uDC28€: https://dandelion.eu/datatxt - ", //surrogate
-            "D\uD83D\uDC3Et\uD83D\uDC3Et\uD83D\uDC3E€: https://dandelion.eu/datatxt - ", //surrogate
             "€€€€€€€: https://dandelion.eu/datatxt €€€", //offset 3
         };
 
         for (String i : input) {
-            RE2Matcher matcher = regex.matcher("Dàtàtxt: https://dandelion.eu/datatxt - the named entity extraction tool by Spaziodati");
+            RE2Matcher matcher = regex.matcher(i);
             assertTrue(i, matcher.find());
             assertEquals(i, "dandelion.eu", matcher.group());
             assertTrue(i, matcher.find(17));
@@ -134,6 +130,27 @@ public class TestMatcherFind {
         }
 
     }
+    @Test
+    public void testSurrogateChars() throws Exception {
+
+        RE2 regex = new RE2("(www\\.)?dandelion\\.eu");
+
+        String[] input = {
+            "D\uD801\uDC28t\uD801\uDC28t\uD801\uDC28€: https://dandelion.eu/datatxt - ", //surrogate
+            "D\uD83D\uDC3Et\uD83D\uDC3Et\uD83D\uDC3E€: https://dandelion.eu/datatxt - ", //surrogate
+        };
+
+        for (String i : input) {
+            RE2Matcher matcher = regex.matcher(i);
+            assertTrue(i, matcher.find());
+            assertEquals(i, "dandelion.eu", matcher.group());
+            assertTrue(i, matcher.find(20));
+            assertEquals(i, "dandelion.eu", matcher.group());
+            assertFalse(i, matcher.find(21));
+        }
+
+    }
+
 
     @Test
     public void testEmptyStrings() throws Exception {
@@ -202,6 +219,6 @@ public class TestMatcherFind {
         assertTrue(matcher.findNext()); //a
         assertTrue(matcher.findNext()); //v
         assertEquals("v", matcher.group());
-        assertEquals("v", matcher.group( 'v'-'a' + 1 ));
+        assertEquals("v", matcher.group('v' - 'a' + 1));
     }
 }

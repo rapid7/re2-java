@@ -244,17 +244,18 @@ JNIEXPORT jint JNICALL Java_com_logentries_re2_RE2_numberOfCapturingGroupsImpl
     return static_cast<jint>(regex->NumberOfCapturingGroups());
 }
 
-
 JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2String_createStringBuffer
-  (JNIEnv *env, jclass cls, jstring input) {
-    const char *str = env->GetStringUTFChars(input, 0);
+  (JNIEnv *env, jclass cls, jbyteArray input) {
+//    const char *str = env->GetStringUTFChars(input, 0);
+    char* str = (char*) env->GetByteArrayElements(input, 0);
     return reinterpret_cast<jlong>(str);
 }
 
+
 JNIEXPORT void JNICALL Java_com_logentries_re2_RE2String_releaseStringBuffer
-  (JNIEnv *env, jclass cls, jstring input, jlong j_pointer) {
+  (JNIEnv *env, jclass cls, jbyteArray input, jlong j_pointer) {
     char *pointer = reinterpret_cast<char*>(j_pointer);
-    env->ReleaseStringUTFChars(input, pointer);
+    env->ReleaseByteArrayElements(input, (jbyte*)pointer, JNI_ABORT);
 }
 
 static const int stackSize = 16 + 1; // see 'kVecSize' in re2.cc

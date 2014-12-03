@@ -1,16 +1,18 @@
 package com.logentries.re2;
 
+import java.nio.charset.StandardCharsets;
+
 /**
  * Created by scaiella on 12/11/14.
  */
 public class RE2String implements CharSequence, AutoCloseable {
 
-    private static native long createStringBuffer(final String input);
-    private static native void releaseStringBuffer(final String input, final long pointer);
-
+    public static native long createStringBuffer(final byte[] input);
+    private static native void releaseStringBuffer(final byte[] input, final long pointer);
 
     private CharSequence input;
     private String inputString;
+    private byte[] utf8String;
     private long utf8StringPointer = 0;
     private UTF8CharOffset utf8Offset;
 
@@ -18,7 +20,12 @@ public class RE2String implements CharSequence, AutoCloseable {
     public RE2String(CharSequence input) {
         this.input = input;
         this.inputString = input.toString();
-        this.utf8StringPointer = createStringBuffer(inputString);
+        try {
+            this.utf8String = inputString.getBytes(StandardCharsets.UTF_8);
+        } catch (Exception e ){
+            throw new IllegalArgumentException("Unable to encode input using UTF-8", e);
+        }
+        this.utf8StringPointer = createStringBuffer(utf8String);
         this.utf8Offset = new UTF8CharOffset(input);
     }
 
@@ -50,7 +57,7 @@ public class RE2String implements CharSequence, AutoCloseable {
 
     private void free() {
         if (utf8StringPointer != 0) {
-            releaseStringBuffer(inputString, utf8StringPointer);
+            releaseStringBuffer(utf8String, utf8StringPointer);
             utf8StringPointer = 0;
         }
     }
