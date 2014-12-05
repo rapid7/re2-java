@@ -1,9 +1,11 @@
 package com.logentries.re2_test;
 
 import com.logentries.re2.*;
+import org.junit.Assert;
 import org.junit.Test;
 
 import java.util.Arrays;
+import java.util.Random;
 import java.util.regex.MatchResult;
 
 import static org.junit.Assert.*;
@@ -220,5 +222,26 @@ public class TestMatcherFind {
         assertTrue(matcher.findNext()); //v
         assertEquals("v", matcher.group());
         assertEquals("v", matcher.group('v' - 'a' + 1));
+    }
+
+    static String rnd(int len) {
+        Random r = new Random();
+        String s = new String();
+        for (int i=0; i<len; i++)
+            s += (char)('a' + r.nextInt('z'-'a'));
+        return s;
+    }
+    @Test
+    public void testString() {
+        Random r = new Random();
+        for (int i=0; i<1000; i++) {
+            String s = rnd(20+r.nextInt(1000));
+            int l = 3 + r.nextInt(5);
+            String regex = s.substring(s.length()-l)+"\\b";
+            RE2 re = RE2.compile(regex);
+            Assert.assertTrue("i:"+i+" len:"+s.length() + " re:"+regex,
+                    re.matcher(s).find(s.length()-l-5, s.length()));
+        }
+
     }
 }

@@ -11,9 +11,12 @@ public class UTF8CharOffset {
     private int[] char2byte;
     private int charSize;
     public UTF8CharOffset(CharSequence input) {
+        this(input, (int)(input.length() * AVG_BYTE_PER_CHAR));
+    }
+    public UTF8CharOffset(CharSequence input, int utf8Len) {
         char2byte = new int[input.length()];
         charSize = input.length();
-        byte2char = new int[(int)(input.length() * AVG_BYTE_PER_CHAR)];
+        byte2char = new int[utf8Len];
         byteSize = 0;
         int strPos = 0;
         for (int i=0; i<input.length(); i++) {
