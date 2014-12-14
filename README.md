@@ -47,7 +47,7 @@ this binding is actually under development.
 
 From folder containing RE2.h and RE2.class: eg.
 
-    sam@sam-lenovo:~/repos/re2-java$ javah -jni -classpath "/home/sam/repos/re2-java/src/main/java" -o src/main/java/com/logentries/re2/RE2.h com.logentries.re2.RE2
+    javah -jni -classpath "/home/<user>/repos/re2-java/src/main/java" -o src/main/java/com/logentries/re2/RE2.h com.logentries.re2.RE2
 
 ### Installation ###
 
