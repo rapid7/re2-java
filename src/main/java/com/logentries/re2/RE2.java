@@ -10,7 +10,10 @@ package com.logentries.re2;
 // Note: AutoCloseable is available since Java 7 for support of try-with-resources statement
 //import java.lang.AutoCloseable;
 
-public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
+import java.util.HashMap;
+import java.util.Map;
+
+public final class RE2 extends LibraryLoader {
     private static native long compileImpl(final String pattern, final Options options) throws RegExprException;
     private static native void releaseImpl(final long pointer);
     private static native boolean fullMatchImpl(final String str, final long pointer, Object ... args);
@@ -18,6 +21,8 @@ public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
 
     private static native boolean fullMatchImpl(final String str, final String pattern, Object ... args);
     private static native boolean partialMatchImpl(final String str, final String pattern, Object ... args);
+
+    private static native Map<String, String> captureGroupsImpl(final String str, final long pointer, Object ... args);
 
     private long pointer;
 
@@ -30,6 +35,7 @@ public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
     public RE2(final String pattern) throws RegExprException {
         this(pattern, null);
     }
+
     public RE2(final String pattern, final Options options) throws RegExprException {
         pointer = compileImpl(pattern, options);
     }
@@ -78,25 +84,36 @@ public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
         }
     }
 
+	/* not used in leevents */
     public static boolean fullMatch(final String str, final String pattern, Object ... args) {
         checkArgs(args);
         return fullMatchImpl(str, pattern, args);
     }
 
+	/* Not used anywhere */
     public static boolean partialMatch(final String str, final String pattern, Object ... args) {
         checkArgs(args);
         return partialMatchImpl(str, pattern, args);
     }
 
+	/* Used once in FilterRegExp */
     public boolean fullMatch(final String str, Object ... args) throws IllegalStateException {
         checkState();
         checkArgs(args);
         return fullMatchImpl(str, pointer, args);
     }
 
+	/* Used once in FilterRegExp */
     public boolean partialMatch(final String str, Object ... args) throws IllegalStateException {
         checkState();
         checkArgs(args);
         return partialMatchImpl(str, pointer, args);
     }
+
+	/* todo new method for capture groups */
+	public Map<String, String> captureGroups(final String str, Object ... args) throws IllegalStateException {
+		checkState();
+		checkArgs(args);
+		return captureGroupsImpl(str, pointer, args);
+	}
 }

@@ -55,6 +55,14 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_fullMatchImpl__Ljava_lang
 JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_lang_String_2Ljava_lang_String_2_3Ljava_lang_Object_2
   (JNIEnv *, jclass, jstring, jstring, jobjectArray);
 
+/*
+ * Class:     com_logentries_re2_RE2
+ * Method:    captureGroupsImpl
+ * Signature: (Ljava/lang/String;J[Ljava/lang/Object;)Ljava/util/Map;
+ */
+JNIEXPORT jobject JNICALL Java_com_logentries_re2_RE2_captureGroupsImpl
+  (JNIEnv *, jclass, jstring, jlong, jobjectArray);
+
 #ifdef __cplusplus
 }
 #endif

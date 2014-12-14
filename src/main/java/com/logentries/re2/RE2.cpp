@@ -141,6 +141,9 @@ JNIEXPORT void JNICALL Java_com_logentries_re2_RE2_releaseImpl
     delete pointer;
 }
 
+
+
+
 struct FullMatchCOp {
     const char *str_;
     const RE2 *pattern_;
@@ -163,6 +166,9 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_fullMatchImpl__Ljava_lang
     env->ReleaseStringUTFChars(j_str, str);
     return static_cast<jboolean>(res);
 }
+
+
+
 
 struct PartialMatchCOp {
     const char *str_;
@@ -187,6 +193,7 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_l
     return static_cast<jboolean>(res);
 }
 
+/* not used */
 struct FullMatchOp {
     const char *str_;
     const char *pattern_;
@@ -211,6 +218,7 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_fullMatchImpl__Ljava_lang
     return static_cast<jboolean>(res);
 }
 
+/* not used */
 struct PartialMatchOp {
     const char *str_;
     const char *pattern_;
@@ -233,4 +241,44 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_l
     env->ReleaseStringUTFChars(j_str, str);
     env->ReleaseStringUTFChars(j_pattern, pattern);
     return static_cast<jboolean>(res);
+}
+
+
+JNIEXPORT jobject JNICALL Java_com_logentries_re2_RE2_captureGroupsImpl
+  (JNIEnv *env, jclass cls, jstring j_str, jlong j_pointer, jobjectArray j_args) {
+    const char *str = env->GetStringUTFChars(j_str, 0);
+    RE2 *pointer = reinterpret_cast<RE2*>(j_pointer);
+
+    jclass map_class = env->FindClass("java/util/HashMap");
+    if (map_class == NULL) return NULL;
+
+    jmethodID hashMapCtor = env->GetMethodID(map_class, "<init>", "()V");
+    jmethodID put = env->GetMethodID(map_class, "put", "(Ljava/lang/Object;Ljava/lang/Object;)""Ljava/lang/Object;");
+    jobject map = env->NewObject(map_class, hashMapCtor);
+
+    // Todo - get capture groups from RE2
+
+    
+
+    // Todo - add named capture keys & associated regexs
+    env->CallObjectMethod(map, put, j_str, j_str);
+
+    env->ReleaseStringUTFChars(j_str, str);
+
+    return map;
+
+//  printf("*** output ***\n");
+//  jclass j_cls = env->FindClass("com/logentries/re2/Encoding");
+//
+//  jmethodID equals_id = env->GetMethodID(j_cls, "equals", "(Ljava/lang/Object;)Z");
+//    const char *fields[] = {"UTF8", "Latin1", };
+//       const RE2::Options::Encoding enc_fields[] = {RE2::Options::EncodingUTF8, RE2::Options::EncodingLatin1, };
+//       for (int i = 0; i < sizeof(fields)/sizeof(*fields); ++i) {
+//           jfieldID fid = env->GetStaticFieldID(j_cls, fields[i], "Lcom/logentries/re2/Encoding;");
+//           jobject item = env->GetStaticObjectField(j_cls, fid);
+//           if (env->CallBooleanMethod(item, equals_id, j_encoding)) {
+//               return enc_fields[i];
+//           }
+//       }
+//       BOOST_VERIFY(0
 }
