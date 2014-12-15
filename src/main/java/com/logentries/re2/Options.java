@@ -79,4 +79,131 @@ public final class Options extends LibraryLoader {
         this.oneLine = oneLine;
         return this;
     }
+
+    /// FLAGS
+    public static interface Flag {
+        public void apply(Options opt);
+    }
+    
+    public static final Flag POSIX_SINTAX = POSIX_SINTAX(true);
+    public static Flag POSIX_SINTAX(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setPosixSyntax(v);
+            }
+        };
+    }
+    public static final Flag LONGEST_MATCH = LONGEST_MATCH (true);
+	public static Flag LONGEST_MATCH(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setLongestMatch(v);
+            }
+        };
+    }
+    public static final Flag LOG_ERRORS = LOG_ERRORS (true);
+	public static Flag LOG_ERRORS(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setLogErrors(v);
+            }
+        };
+    }
+    public static final Flag LITERAL = LITERAL (true);
+	public static Flag LITERAL(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setLiteral(v);
+            }
+        };
+    }
+    public static final Flag NEVER_NL = NEVER_NL (true);
+	public static Flag NEVER_NL(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setNeverNl(v);
+            }
+        };
+    }
+    public static final Flag NEVER_CAPTURE = NEVER_CAPTURE (true);
+	public static Flag NEVER_CAPTURE(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setNeverCapture(v);
+            }
+        };
+    }
+    public static final Flag CASE_SENSITIVE = CASE_SENSITIVE (true);
+	public static Flag CASE_SENSITIVE(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setCaseSensitive(v);
+            }
+        };
+    }
+    public static final Flag CASE_INSENSITIVE = CASE_INSENSITIVE (true);
+	public static Flag CASE_INSENSITIVE(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setCaseInsensitive(v);
+            }
+        };
+    }
+    public static final Flag PERL_CLASSES = PERL_CLASSES (true);
+	public static Flag PERL_CLASSES(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setPerlClasses(v);
+            }
+        };
+    }
+    public static final Flag WORD_BOUNDARY = WORD_BOUNDARY (true);
+	public static Flag WORD_BOUNDARY(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setWordBoundary(v);
+            }
+        };
+    }
+    public static final Flag ONE_LINE = ONE_LINE (true);
+	public static Flag ONE_LINE(final boolean v) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setOneLine(v);
+            }
+        };
+    }
+
+    public static Flag MAX_MEMORY(final long m) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setMaxMem(m);
+            }
+        };
+    }
+
+    public static final Flag UTF8_ENCODING = ENCODING(Encoding.UTF8);
+    public static final Flag LATIN1_ENCODING = ENCODING(Encoding.Latin1);
+    public static Flag ENCODING(final Encoding e) {
+        return new Flag() {
+            @Override
+            public void apply(Options opt) {
+                opt.setEncoding(e);
+            }
+        };
+    }
+
+
 }

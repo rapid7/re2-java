@@ -11,7 +11,7 @@ build: $(OBJ)/libre2-java.so class
 
 .re2.download.stamp:
 #	hg clone https://re2.googlecode.com/hg re2
-	wget http://re2.googlecode.com/files/re2-20121029.tgz -O re2.tgz
+	wget http://re2.googlecode.com/files/re2-20140304.tgz -O re2.tgz
 	tar xvf re2.tgz
 	touch .re2.download.stamp
 
@@ -36,6 +36,8 @@ target/libre2-java-1.0-SNAPSHOT.jar: add-so
 add-so: .re2.compile.stamp $(OBJ)/libre2-java.so
 	mkdir -p $(NATIVES-TARGET)
 	cp $(OBJ)/libre2-java.so re2/obj/so/libre2.so $(NATIVES-TARGET)
+
+lib: add-so
 
 clean:
 	rm -fr re2
