@@ -7,6 +7,10 @@
 
 package com.logentries.re2;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.MatchResult;
+
 public final class RE2 extends LibraryLoader implements AutoCloseable {
     private static native long compileImpl(final String pattern, final Options options) throws RegExprException;
     private static native void releaseImpl(final long pointer);
@@ -130,6 +134,26 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
     public RE2Matcher matcher(final RE2String str, boolean fetchGroups) {
         checkState();
         return new RE2Matcher(str, this, pointer, fetchGroups);
+    }
+
+    public Map<String, String> getCaptureGroups(final String str, Object ... args) {
+        checkState();
+        checkArgs(args);
+
+        int numCaptureGroups = numberOfCapturingGroupsImpl(pointer);
+        Map<String, String> groupsMap = new HashMap<>(numCaptureGroups);
+
+
+
+        RE2Matcher re2match = this.matcher(str);
+        for(MatchResult match : re2match) {
+
+            String group = match.group();
+            String substring = str.substring(match.start(), match.end());
+
+        }
+
+        return groupsMap;
     }
 
 }

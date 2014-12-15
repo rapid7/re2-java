@@ -4,7 +4,7 @@
     <groupId>com.logentries.re2</groupId>
     <artifactId>libre2-java</artifactId>
     <packaging>jar</packaging>
-    <version>1.2.4</version>
+    <version>1.2.4-SNAPSHOT</version>
     <name>libre2-java</name>
     <url>http://maven.apache.org</url>
     <dependencies>
@@ -24,9 +24,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.2</version>
                 <configuration>
-                    <!-- or whatever version you use -->
-                    <source>1.7</source>
-                    <target>1.7</target>
+                    <target>1.8</target>
+                    <source>1.8</source>
                 </configuration>
             </plugin>
             <plugin>
