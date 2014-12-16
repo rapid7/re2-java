@@ -162,8 +162,9 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         RE2Matcher re2match = this.matcher(str);
 
         for (MatchResult match : re2match) {
-            CaptureGroup captureGroup = new CaptureGroup(match.group(), match.start(), match.end());
-            captureGroups.add(captureGroup);
+            for (int i = 1; i < match.groupCount(); i++) {
+                captureGroups.add(new CaptureGroup(match.group(i), match.start(i), match.end(i)));
+            }
         }
         return captureGroups;
     }
@@ -180,7 +181,8 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         int len = names.size();
 
         if (len != captureGroups.size()) {
-            throw new IllegalStateException("list of names and capture groups not same length");
+            // Matching text for a named group hasn't been found.
+            return namedGroups;
         }
 
         for (int i = 0; i < len; i++) {
@@ -188,5 +190,4 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         }
         return namedGroups;
     }
-
 }
