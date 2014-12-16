@@ -9,11 +9,15 @@
 #include <boost/assert.hpp>
 #include <new>
 #include <cstdio>
+#include <string>
+#include <map>
+#include <iostream>
 #include "RE2.h"
 #include "op.h"
 #include "Options.h"
 
 using re2::StringPiece;
+using namespace std;
 
 template<typename Dst, typename Src>
 static Dst safe_cast(Src src) {
@@ -245,44 +249,27 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_l
     return static_cast<jboolean>(res);
 }
 
-
-JNIEXPORT jobject JNICALL Java_com_logentries_re2_RE2_captureGroupsImpl
-  (JNIEnv *env, jclass cls, jstring j_str, jlong j_pointer, jobjectArray j_args) {
-    const char *str = env->GetStringUTFChars(j_str, 0);
+JNIEXPORT jobject JNICALL Java_com_logentries_re2_RE2_getCaptureGroupNamesImpl
+  (JNIEnv *env, jclass cls, jlong j_pointer, jobjectArray j_args) {
     RE2 *pointer = reinterpret_cast<RE2*>(j_pointer);
 
-    jclass map_class = env->FindClass("java/util/HashMap");
-    if (map_class == NULL) return NULL;
+    jclass j_array_list = env->FindClass("java/util/ArrayList");
+    if (j_array_list == NULL) return NULL;
 
-    jmethodID hashMapCtor = env->GetMethodID(map_class, "<init>", "()V");
-    jmethodID put = env->GetMethodID(map_class, "put", "(Ljava/lang/Object;Ljava/lang/Object;)""Ljava/lang/Object;");
-    jobject map = env->NewObject(map_class, hashMapCtor);
+    jmethodID arrayListCtor = env->GetMethodID(j_array_list, "<init>", "()V");
+    jmethodID add = env->GetMethodID(j_array_list, "add", "(Ljava/lang/Object;)Z");
+    jobject java_array_list = env->NewObject(j_array_list, arrayListCtor);
 
-    // Todo - get capture groups from RE2
+    map<int, string> groupNames = (pointer->CapturingGroupNames());
+    map<int, string>::iterator it;
 
-    
+    for (it = groupNames.begin(); it != groupNames.end(); ++it) {
+		jstring jvalue = env->NewStringUTF(it->second.c_str());
 
-    // Todo - add named capture keys & associated regexs
-    env->CallObjectMethod(map, put, j_str, j_str);
+		env->CallObjectMethod(java_array_list, add, jvalue);
+    };
 
-    env->ReleaseStringUTFChars(j_str, str);
-
-    return map;
-
-//  printf("*** output ***\n");
-//  jclass j_cls = env->FindClass("com/logentries/re2/Encoding");
-//
-//  jmethodID equals_id = env->GetMethodID(j_cls, "equals", "(Ljava/lang/Object;)Z");
-//    const char *fields[] = {"UTF8", "Latin1", };
-//       const RE2::Options::Encoding enc_fields[] = {RE2::Options::EncodingUTF8, RE2::Options::EncodingLatin1, };
-//       for (int i = 0; i < sizeof(fields)/sizeof(*fields); ++i) {
-//           jfieldID fid = env->GetStaticFieldID(j_cls, fields[i], "Lcom/logentries/re2/Encoding;");
-//           jobject item = env->GetStaticObjectField(j_cls, fid);
-//           if (env->CallBooleanMethod(item, equals_id, j_encoding)) {
-//               return enc_fields[i];
-//           }
-//       }
-//       BOOST_VERIFY(0
+    return java_array_list;
 }
 
 JNIEXPORT jint JNICALL Java_com_logentries_re2_RE2_numberOfCapturingGroupsImpl

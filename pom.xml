@@ -4,7 +4,7 @@
     <groupId>com.logentries.re2</groupId>
     <artifactId>libre2-java</artifactId>
     <packaging>jar</packaging>
-    <version>1.2.4-SNAPSHOT</version>
+    <version>1.2.5-SNAPSHOT</version>
     <name>libre2-java</name>
     <url>http://maven.apache.org</url>
 

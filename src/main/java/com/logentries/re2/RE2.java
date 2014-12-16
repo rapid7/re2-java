@@ -7,8 +7,11 @@
 
 package com.logentries.re2;
 
-import java.util.HashMap;
-import java.util.Map;
+import com.logentries.re2.entity.CaptureGroup;
+import com.logentries.re2.entity.NamedGroup;
+
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.MatchResult;
 
 public final class RE2 extends LibraryLoader implements AutoCloseable {
@@ -16,11 +19,9 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
     private static native void releaseImpl(final long pointer);
     private static native boolean fullMatchImpl(final String str, final long pointer, Object ... args);
     private static native boolean partialMatchImpl(final String str, final long pointer, Object ... args);
-
     private static native boolean fullMatchImpl(final String str, final String pattern, Object ... args);
     private static native boolean partialMatchImpl(final String str, final String pattern, Object ... args);
-
-    private static native Map<String, String> captureGroupsImpl(final String str, final long pointer, Object ... args);
+    private static native List<String> getCaptureGroupNamesImpl(final long pointer, Object ... args);
     private static native int numberOfCapturingGroupsImpl(final long pointer);
 
     private long pointer;
@@ -100,38 +101,40 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         }
     }
 
-	/* not used in leevents */
     public static boolean fullMatch(final String str, final String pattern, Object ... args) {
         checkArgs(args);
         return fullMatchImpl(str, pattern, args);
     }
 
-	/* Not used anywhere */
     public static boolean partialMatch(final String str, final String pattern, Object ... args) {
         checkArgs(args);
         return partialMatchImpl(str, pattern, args);
     }
 
-	/* Used once in FilterRegExp */
     public boolean fullMatch(final String str, Object ... args) throws IllegalStateException {
         checkState();
         checkArgs(args);
         return fullMatchImpl(str, pointer, args);
     }
 
-	/* Used once in FilterRegExp */
     public boolean partialMatch(final String str, Object ... args) throws IllegalStateException {
         checkState();
         checkArgs(args);
         return partialMatchImpl(str, pointer, args);
     }
 
-    /* todo new method for capture groups */
-	public Map<String, String> captureGroups(final String str, Object ... args) throws IllegalStateException {
-		checkState();
-		checkArgs(args);
-		return captureGroupsImpl(str, pointer, args);
-	}
+    /**
+     * This method returns ordered names.
+     *
+     * @param args
+     * @return List of names for the capture groups
+     * @throws IllegalStateException
+     */
+    public List<String> getCaptureGroupNames(Object... args) throws IllegalStateException {
+        checkState();
+        checkArgs(args);
+        return getCaptureGroupNamesImpl(pointer, args);
+    }
 
     public RE2Matcher matcher(final CharSequence str) {
         return matcher(str, true);
@@ -148,24 +151,42 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         return new RE2Matcher(str, this, pointer, fetchGroups);
     }
 
-    public Map<String, String> getCaptureGroups(final String str, Object ... args) {
+    /**
+     * Gets the ordered capture groups for this event and pattern.
+     * @param str is an event.
+     * @return is a list of CaptureGroups.
+     */
+    public List<CaptureGroup> getCaptureGroups(final String str) {
         checkState();
-        checkArgs(args);
-
-        int numCaptureGroups = numberOfCapturingGroupsImpl(pointer);
-        Map<String, String> groupsMap = new HashMap<>(numCaptureGroups);
-
-
-
+        List<CaptureGroup> captureGroups = new ArrayList<>();
         RE2Matcher re2match = this.matcher(str);
-        for(MatchResult match : re2match) {
 
-            String group = match.group();
-            String substring = str.substring(match.start(), match.end());
+        for (MatchResult match : re2match) {
+            CaptureGroup captureGroup = new CaptureGroup(match.group(), match.start(), match.end());
+            captureGroups.add(captureGroup);
+        }
+        return captureGroups;
+    }
 
+    /**
+     * Returns a list of named capture groups and their position information in the event.
+     * @param str is an event.
+     * @return is a list of named capture groups.
+     */
+    public List<NamedGroup> getNamedCaptureGroups(final String str) {
+        List<NamedGroup> namedGroups = new ArrayList<>();
+        List<CaptureGroup> captureGroups = new ArrayList(getCaptureGroups(str));
+        List<String> names = new ArrayList(getCaptureGroupNames());
+        int len = names.size();
+
+        if (len != captureGroups.size()) {
+            throw new IllegalStateException("list of names and capture groups not same length");
         }
 
-        return groupsMap;
+        for (int i = 0; i < len; i++) {
+            namedGroups.add(new NamedGroup(names.get(i), captureGroups.get(i)));
+        }
+        return namedGroups;
     }
 
 }

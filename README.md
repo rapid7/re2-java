@@ -44,7 +44,7 @@ this binding is actually under development.
 
 ### Generating header files - example ###
 
-From folder containing RE2.h and RE2.class: eg.
+From root folder containing pom.xml, src/ etc.
 
     javah -jni -classpath "/home/<user>/repos/re2-java/src/main/java" -o src/main/java/com/logentries/re2/RE2.h com.logentries.re2.RE2
 
