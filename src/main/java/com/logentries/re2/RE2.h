@@ -57,6 +57,14 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_l
 
 /*
  * Class:     com_logentries_re2_RE2
+ * Method:    captureGroupNamesImpl
+ * Signature: (J[Ljava/lang/Object;)Ljava/util/List;
+ */
+JNIEXPORT jobject JNICALL Java_com_logentries_re2_RE2_getCaptureGroupNamesImpl
+  (JNIEnv *, jclass, jlong, jobjectArray);
+
+/*
+ * Class:     com_logentries_re2_RE2
  * Method:    numberOfCapturingGroupsImpl
  * Signature: (J)I
  */
