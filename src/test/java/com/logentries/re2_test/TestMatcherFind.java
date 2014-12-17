@@ -69,7 +69,7 @@ public class TestMatcherFind {
         assertEquals(1, new RE2(oneNamedGroup).getCaptureGroupNames().size());
         assertEquals(2, new RE2(twoNamedGroups).getCaptureGroupNames().size());
         assertEquals(3, new RE2(nestedNamedGroups).getCaptureGroupNames().size());
-        //assertEquals(1, new RE2(optionalNamedGroup).getCaptureGroupNames().size());
+        assertEquals(1, new RE2(optionalNamedGroup).getCaptureGroupNames().size());
 
         for (int i = 0; i < 3; i++) {
             assertEquals("name"+(i+1), new RE2(nestedNamedGroups).getCaptureGroupNames().get(i));
@@ -77,7 +77,7 @@ public class TestMatcherFind {
     }
 
     @Test
-    public void getSingleNamedCaptureGroupsTest() throws Exception {
+    public void testSingleNamedCaptureGroupsTest() throws Exception {
         String event = "test code best log";
         RE2 regex = new RE2(oneNamedGroup);
 
@@ -90,7 +90,7 @@ public class TestMatcherFind {
     }
 
     @Test
-    public void getMultipleNamedCaptureGroupsTest() throws Exception {
+    public void testMultipleNamedCaptureGroupsTest() throws Exception {
         String event = "test code best log";
         RE2 regex = new RE2(twoNamedGroups);
 
@@ -105,7 +105,7 @@ public class TestMatcherFind {
     }
 
     @Test
-    public void getNestedNamedCaptureGroupsTest() throws Exception {
+    public void testNestedNamedCaptureGroupsTest() throws Exception {
         String event = "test code best log";
         RE2 regex = new RE2(nestedNamedGroups);
 
@@ -119,6 +119,27 @@ public class TestMatcherFind {
         assertEquals("test", namedCaptureGroups.get(1).captureGroup.matchingText);
         assertEquals("name3", namedCaptureGroups.get(2).name);
         assertEquals("de", namedCaptureGroups.get(2).captureGroup.matchingText);
+    }
+
+    @Test
+    public void testOptionalNamedCaptureGroupsTest() throws Exception {
+        String event = "hello log";
+        RE2 regex = new RE2(optionalNamedGroup);
+
+        List<String> names = regex.getCaptureGroupNames();
+        List<NamedGroup> namedCaptureGroups = regex.getNamedCaptureGroups(names, event);
+
+        assertEquals(1, namedCaptureGroups.size());
+        assertEquals("name1", namedCaptureGroups.get(0).name);
+        assertEquals("hello", namedCaptureGroups.get(0).captureGroup.matchingText);
+
+        String event2 = "test log";
+        RE2 regex2 = new RE2(optionalNamedGroup);
+
+        List<String> names2 = regex.getCaptureGroupNames();
+        List<NamedGroup> namedCaptureGroups2 = regex2.getNamedCaptureGroups(names2, event2);
+
+        assertEquals(0, namedCaptureGroups2.size());
     }
 
     @Test

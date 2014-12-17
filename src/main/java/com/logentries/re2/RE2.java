@@ -152,8 +152,8 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
     }
 
     /**
-     * Gets the ordered capture groups for this event and pattern.
-     * @param str is an event.
+     * Gets the ordered capture groups for this event message and pattern.
+     * @param str is an events message.
      * @return is a list of CaptureGroups.
      */
     public List<CaptureGroup> getCaptureGroups(final String str) {
@@ -161,23 +161,29 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         List<CaptureGroup> captureGroups = new ArrayList<>();
         RE2Matcher re2match = this.matcher(str);
 
-        for (MatchResult match : re2match) {
-            for (int i = 1; i < match.groupCount(); i++) {
-                captureGroups.add(new CaptureGroup(match.group(i), match.start(i), match.end(i)));
+        try {
+            for (MatchResult match : re2match) {
+                for (int i = 1; i < match.groupCount(); i++) {
+                    if (match.start() > -1) {
+                        captureGroups.add(new CaptureGroup(match.group(i), match.start(i), match.end(i)));
+                    }
+                }
             }
+        } catch (IndexOutOfBoundsException e) {
+            return captureGroups;
         }
         return captureGroups;
     }
 
     /**
-     * Returns a list of named capture groups and their position information in the event.
+     * Returns a list of named capture groups and their position information in the event message.
      * @param names is a list of names to match against.
-     * @param str is an event.
+     * @param str is an events message.
      * @return is a list of named capture groups.
      */
     public List<NamedGroup> getNamedCaptureGroups(List<String> names, final String str) {
         List<NamedGroup> namedGroups = new ArrayList<>();
-        List<CaptureGroup> captureGroups = new ArrayList(getCaptureGroups(str));
+        List<CaptureGroup> captureGroups = getCaptureGroups(str);
         int len = names.size();
 
         if (len != captureGroups.size()) {
@@ -186,7 +192,9 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         }
 
         for (int i = 0; i < len; i++) {
-            namedGroups.add(new NamedGroup(names.get(i), captureGroups.get(i)));
+            if (captureGroups.get(i).start > -1) {
+                namedGroups.add(new NamedGroup(names.get(i), captureGroups.get(i)));
+            }
         }
         return namedGroups;
     }
