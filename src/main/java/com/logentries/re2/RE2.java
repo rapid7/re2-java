@@ -171,13 +171,13 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
 
     /**
      * Returns a list of named capture groups and their position information in the event.
+     * @param names is a list of names to match against.
      * @param str is an event.
      * @return is a list of named capture groups.
      */
-    public List<NamedGroup> getNamedCaptureGroups(final String str) {
+    public List<NamedGroup> getNamedCaptureGroups(List<String> names, final String str) {
         List<NamedGroup> namedGroups = new ArrayList<>();
         List<CaptureGroup> captureGroups = new ArrayList(getCaptureGroups(str));
-        List<String> names = new ArrayList(getCaptureGroupNames());
         int len = names.size();
 
         if (len != captureGroups.size()) {
