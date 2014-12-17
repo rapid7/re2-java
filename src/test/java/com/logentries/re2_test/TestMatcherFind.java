@@ -1,10 +1,11 @@
 package com.logentries.re2_test;
 
 import com.logentries.re2.*;
+import com.logentries.re2.entity.NamedGroup;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.regex.MatchResult;
 
@@ -12,7 +13,10 @@ import static org.junit.Assert.*;
 
 
 public class TestMatcherFind {
-
+    final String oneNamedGroup = "(?P<name1>code)";
+    final String twoNamedGroups = "(?P<name1>test).*co(?P<name2>de)";
+    final String nestedNamedGroups = "(?P<name1>(?P<name2>test).*co(?P<name3>de))";
+    final String optionalNamedGroup = "(?P<name1>hello)?";
 
     @Test
     public void testFindSimple() throws Exception {
@@ -59,6 +63,64 @@ public class TestMatcherFind {
 
         assertFalse(matcher.findNext());
     }
+
+    @Test
+    public void testGetCaptureGroupNames() throws  Exception {
+        assertEquals(1, new RE2(oneNamedGroup).getCaptureGroupNames().size());
+        assertEquals(2, new RE2(twoNamedGroups).getCaptureGroupNames().size());
+        assertEquals(3, new RE2(nestedNamedGroups).getCaptureGroupNames().size());
+        //assertEquals(1, new RE2(optionalNamedGroup).getCaptureGroupNames().size());
+
+        for (int i = 0; i < 3; i++) {
+            assertEquals("name"+(i+1), new RE2(nestedNamedGroups).getCaptureGroupNames().get(i));
+        }
+    }
+
+    @Test
+    public void getSingleNamedCaptureGroupsTest() throws Exception {
+        String event = "test code best log";
+        RE2 regex = new RE2(oneNamedGroup);
+
+        List<String> names = regex.getCaptureGroupNames();
+        List<NamedGroup> namedCaptureGroups = regex.getNamedCaptureGroups(names, event);
+
+        assertEquals(1, namedCaptureGroups.size());
+        assertEquals("name1", namedCaptureGroups.get(0).name);
+        assertEquals("code", namedCaptureGroups.get(0).captureGroup.matchingText);
+    }
+
+    @Test
+    public void getMultipleNamedCaptureGroupsTest() throws Exception {
+        String event = "test code best log";
+        RE2 regex = new RE2(twoNamedGroups);
+
+        List<String> names = regex.getCaptureGroupNames();
+        List<NamedGroup> namedCaptureGroups = regex.getNamedCaptureGroups(names, event);
+
+        assertEquals(2, namedCaptureGroups.size());
+        assertEquals("name1", namedCaptureGroups.get(0).name);
+        assertEquals("test", namedCaptureGroups.get(0).captureGroup.matchingText);
+        assertEquals("name2", namedCaptureGroups.get(1).name);
+        assertEquals("de", namedCaptureGroups.get(1).captureGroup.matchingText);
+    }
+
+    @Test
+    public void getNestedNamedCaptureGroupsTest() throws Exception {
+        String event = "test code best log";
+        RE2 regex = new RE2(nestedNamedGroups);
+
+        List<String> names = regex.getCaptureGroupNames();
+        List<NamedGroup> namedCaptureGroups = regex.getNamedCaptureGroups(names, event);
+
+        assertEquals(3, namedCaptureGroups.size());
+        assertEquals("name1", namedCaptureGroups.get(0).name);
+        assertEquals("test code", namedCaptureGroups.get(0).captureGroup.matchingText);
+        assertEquals("name2", namedCaptureGroups.get(1).name);
+        assertEquals("test", namedCaptureGroups.get(1).captureGroup.matchingText);
+        assertEquals("name3", namedCaptureGroups.get(2).name);
+        assertEquals("de", namedCaptureGroups.get(2).captureGroup.matchingText);
+    }
+
     @Test
     public void testFindNext() throws Exception {
         RE2 regex = new RE2("(www\\.)?dandelion\\.(eu)");
