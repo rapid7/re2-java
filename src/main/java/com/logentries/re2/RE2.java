@@ -7,10 +7,7 @@
 
 package com.logentries.re2;
 
-// Note: AutoCloseable is available since Java 7 for support of try-with-resources statement
-//import java.lang.AutoCloseable;
-
-public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
+public final class RE2 extends LibraryLoader implements AutoCloseable {
     private static native long compileImpl(final String pattern, final Options options) throws RegExprException;
     private static native void releaseImpl(final long pointer);
     private static native boolean fullMatchImpl(final String str, final long pointer, Object ... args);
@@ -19,6 +16,8 @@ public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
     private static native boolean fullMatchImpl(final String str, final String pattern, Object ... args);
     private static native boolean partialMatchImpl(final String str, final String pattern, Object ... args);
 
+    private static native int numberOfCapturingGroupsImpl(final long pointer);
+
     private long pointer;
 
     private void checkState() throws IllegalStateException {
@@ -26,12 +25,30 @@ public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
             throw new IllegalStateException();
         }
     }
-
-    public RE2(final String pattern) throws RegExprException {
-        this(pattern, null);
+    boolean isClosed() {
+        return pointer == 0;
     }
+
     public RE2(final String pattern, final Options options) throws RegExprException {
         pointer = compileImpl(pattern, options);
+    }
+    public RE2(final String pattern, final Options.Flag... options) throws RegExprException {
+        Options opt = new Options();
+        for (Options.Flag f : options) f.apply(opt);
+        pointer = compileImpl(pattern, opt);
+    }
+
+    public static RE2 compile(final String pattern, final Options.Flag... options) {
+        try {
+            return new RE2(pattern, options);
+        } catch (RegExprException ree) {
+            throw new IllegalArgumentException(ree);
+        }
+    }
+
+    public int numberOfCapturingGroups() {
+        checkState();
+        return numberOfCapturingGroupsImpl(pointer);
     }
 
     public void dispoze() {
@@ -99,4 +116,20 @@ public final class RE2 extends LibraryLoader /* implements AutoCloseable */ {
         checkArgs(args);
         return partialMatchImpl(str, pointer, args);
     }
+
+    public RE2Matcher matcher(final CharSequence str) {
+        return matcher(str, true);
+    }
+    public RE2Matcher matcher(final CharSequence str, boolean fetchGroups) {
+        checkState();
+        return new RE2Matcher(str, this, pointer, fetchGroups);
+    }
+    public RE2Matcher matcher(final RE2String str) {
+        return matcher(str, true);
+    }
+    public RE2Matcher matcher(final RE2String str, boolean fetchGroups) {
+        checkState();
+        return new RE2Matcher(str, this, pointer, fetchGroups);
+    }
+
 }

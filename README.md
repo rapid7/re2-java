@@ -13,8 +13,7 @@ Like [RE2 library](http://code.google.com/p/re2/) iteself, this library can be d
 ## Installation ##
 
 ### Requirements ###
-* Java 6 (JDK 1.6) or higher. Set environment variable `JAVA_HOME` to point to the root directory of JDK.
-  I really like try-with-resources statement from Java 7, but on the other hand, Java 7 seems not to be stable enough so far.
+* Java 7 (JDK 1.7, never tested on Java 8). Set environment variable `JAVA_HOME` to point to the root directory of JDK.
 * Maven 3.x , http://maven.apache.org/ .
 - Check that mvn command can be run from your command line.
 * gcc 4.5.x or higher.
@@ -49,6 +48,22 @@ After running of `make`, directory `target` contains jar file with the library. 
 Native library files (libre2.so and libre2-java.so) are part of the jar file as well. They are extracted after JVM
 startup, saved into temporary files and dynamically loaded into the address space of the JVM.
 
+### Changelog ###
+
+#### v1.2
+
+  - added `RE2.compile` static method, similar to `Pattern.compile`. The main difference with the `RE2` constructor
+  is that `compile` method doesn't use checked exception and you can avoid `try/catch` block.
+
+  - support for `RE2String` that can be reused with multiple patterns, in order to avoid multiple copies of the same string.
+
+  - generalization of `RE2.matcher` that now accepts `CharSequence` rather than `String`
+
+#### v1.1
+
+ - support for `RE2Matcher`
+
+
 ## Usage ##
 
 For usage of the library, please import `com.logentries.re2.RE2` and `com.logentries.re2.Options` .
@@ -73,6 +88,109 @@ Precompiled RE supports member functions `partialMatch(.)` or `fullMatch(.)`.
 
     re.fullMatch("2569");
     re.partialMatch("xxx=2569");
+
+`RE2` constructor is declared with checked exception that can be raised if the regex is malformed. This is quite annoying if
+the regex is a static variable instantiated at startup. You can then use static method `RE2.compile` that wraps checked exception
+to the unchecked `IllegalArgumentException`.
+
+    public class MyClass {
+        private static RE2 regex = RE2.compile("...");
+    }
+
+### Matcher ###
+
+`RE2` object supports also a more javaesque interface, similar to `java.util.regex.Pattern` and `java.util.regex.Matcher`.
+
+    RE2 re = new RE2("..(..)");
+    RE2Matcher matcher = re.matcher("my input string");
+    if (matcher.find()) {
+      // get matching string(s),
+      // see java.util.regex.Matcher javadoc or
+      // com.logentries.re2.RE2Matcher code for additional details
+      // eg. matcher.group(<n>) or matcher.start(<n>) and matcher.end(<n>)
+      ...
+    }
+
+You can also iterate over the input string searching for repeated pattern
+
+    RE2 re = new RE2("bla?");
+    RE2Matcher matcher = re.matcher("my bla input string bl bla");
+    while (matcher.findNext()) {
+      // 3 iterations, get positions using matcher.start() and matcher.end()
+    }
+
+`R2Matcher` also implements `java.util.Iterable<java.util.regex.MatchResult>`.
+It can be used this way
+
+    int c = 0;
+    for (MatchResult mr : new RE2("t").matcher("input text")) {
+        // play with matches using mr.start, mr.end, mr.group
+    }
+    assertEquals(3, c);
+
+This can be very useful when playing with this library in Scala:
+
+    import scala.collection.JavaConversions._
+    import com.logentries.re2._
+
+    new RE2("abc?") matcher "abc and abc ab ab" map( _.group ) foreach println
+
+If you are not interested in fetching groups offset you can disable this feature, by using
+
+    RE2Matcher m = new RE2("ab(c?)").matcher("abc and abc ab ab", false);
+    assertEquals(1, m.GroupCount());
+    // now m contains information only for group 0
+    // so m.start(), m.end() and m.group()
+    // trying m.{start|end|group}(n : n > 0) always fails
+
+If your regex is very complex (most likely programmatically composed by concatenating different patterns) and the
+number of groups is huge, this can improve performance significantly (data structures to contain all possible matches
+are not allocated).
+
+**NOTE 1**: `RE2Matcher` object maintains a pointer to a char buffer that is used in C++ stack to manage the current string, in order to avoid a copy for each iteration.
+For this reason, `RE2Matcher` object implements AutoCloseable interface, to be used in `try-with-resource` statement.
+Close method is called in `finalize()`, so garbage collector will ensure (sooner or later) to free the memory. This is the same pattern that has been used for
+`RE2` object, but, usually, `RE2` regex are compiled and then used multiple times while `RE2Matcher` objects
+are used in stack and most likely you will want to delete it as soon as has been used.
+In this case, you can use the `try-with-resource` block to make sure you don't miss anything
+
+    try (RE2Matcher matcher = re.matcher("my bla input string bl bla")) {
+      matcher. ....
+    }
+
+**NOTE 2**: `RE2Matcher` is not thread-safe, just like `java.util.regex.Matcher`
+
+### Re-using strings ###
+
+Whenever a `RE2Matcher` is created, the content of the string is copied to make it accessible from C++ stack. If you have to
+check and search for several patterns on the same string, this could affect performances, because you are copying
+the same string multiple times.
+
+For this reason, from version v1.2, we have implemented a new object, `RE2String` that is a wrapper for a `CharSequence`.
+You can create an instance of this object in advance, and then create a `RE2Matcher` using your `RE2String`. This new object
+can be re-used multiple times to create matchers for different patterns.
+When `RE2Matcher` is created using a `RE2String`, it doesn't copy the string and when you close it (see above about the `AutoCloseable` interface)
+simply does nothing. Similarly, `RE2String` implements `AutoCloseable` interface and `finalize` method has been overridden to let the GC
+clean resources for you.
+
+
+    RE2 regex1 = RE2.compile("\\b[\\d]{5}\\b");
+    RE2 regex2 = RE2.compile("\\b[a-zA-Z]{5}\\b");
+
+    String input = ....
+    RE2String rstring = new RE2String(input);
+
+    RE2Matcher m1 = regex1.matcher(rstring);
+    RE2Matcher m2 = regex2.matcher(rstring);
+    while(m1.find()) {
+        int endFirst = m1.end();
+        if (m2.find(endFirst, endFirst + 10)) {
+            ...
+        }
+    }
+
+    // here m1.close() and m2.close() do nothing
+
 
 ### Submatch extraction ###
 
@@ -101,7 +219,9 @@ I know that a lot of Java programmers may complain that the interface based on p
 is quite bad practise, dirty trick and that it introduces something what is in fact not present in Java.
 
 But after I try it in a real code I decided that it is the best way to pass the values of submatches.
-If you have any idea how to implement it in different way, please give me know.
+~~If you have any idea how to implement it in different way, please give me know.~~ *See Matcher interface above*
+
+
 
 ### Options  ###
 
@@ -118,13 +238,12 @@ or equivalently:
 
     Options opt = new Options().setNeverNl(true).setWordBoundary(false);
 
-etc.
+`RE2` constructor is now overloaded to support for explicit flag list, to mimic C++ style:
 
-C++ interface contains automatic conversion from some options to RE2::Options. For example you can write (in C++):
+        RE2 regex = new RE2("TGIF?",
+            Options.CASE_INSENSITIVE,
+            Options.ENCODING(Encoding.UTF8),
+            Options.PERL_CLASSES(false)
+        );
 
-    RE2 re("(ab", RE2::Quiet);
-
-It cannot be done in Java, instead you should write:
-
-    RE2 re2 = new RE2("Ourobor+os", new Options().setQuiet(true));
-    ...
+ see `Options` static fields for further details.

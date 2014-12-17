@@ -13,6 +13,8 @@
 #include "op.h"
 #include "Options.h"
 
+using re2::StringPiece;
+
 template<typename Dst, typename Src>
 static Dst safe_cast(Src src) {
     Dst dst = static_cast<Dst>(src);
@@ -234,3 +236,70 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_l
     env->ReleaseStringUTFChars(j_pattern, pattern);
     return static_cast<jboolean>(res);
 }
+
+JNIEXPORT jint JNICALL Java_com_logentries_re2_RE2_numberOfCapturingGroupsImpl
+  (JNIEnv *env, jclass cls, jlong re2_pointer) {
+
+    RE2 *regex = reinterpret_cast<RE2*>(re2_pointer);
+    return static_cast<jint>(regex->NumberOfCapturingGroups());
+}
+
+JNIEXPORT jlong JNICALL Java_com_logentries_re2_RE2String_createStringBuffer
+  (JNIEnv *env, jclass cls, jbyteArray input) {
+//    const char *str = env->GetStringUTFChars(input, 0);
+    char* str = (char*) env->GetByteArrayElements(input, 0);
+    return reinterpret_cast<jlong>(str);
+}
+
+
+JNIEXPORT void JNICALL Java_com_logentries_re2_RE2String_releaseStringBuffer
+  (JNIEnv *env, jclass cls, jbyteArray input, jlong j_pointer) {
+    char *pointer = reinterpret_cast<char*>(j_pointer);
+    env->ReleaseByteArrayElements(input, (jbyte*)pointer, JNI_ABORT);
+}
+
+static const int stackSize = 16 + 1; // see 'kVecSize' in re2.cc
+
+JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2Matcher_findImpl
+  (JNIEnv *env, jclass cls, jobject matcher, jlong re2_pointer, jlong str_pointer, jint ngroups, jint start, jint end) {
+
+
+    RE2 *regex = reinterpret_cast<RE2*>(re2_pointer);
+    char *str = reinterpret_cast<char*>(str_pointer);
+
+    StringPiece* groups;
+    StringPiece stackgroups[stackSize];
+    StringPiece* heapgroups = NULL;
+
+    if (ngroups <= stackSize) {
+        groups = stackgroups;
+    } else {
+        groups = new StringPiece[ngroups];
+        heapgroups = groups;
+    }
+
+    StringPiece text(str);
+    const bool res = regex->Match(text, start, end, RE2::UNANCHORED, groups, ngroups);
+    if (res) {
+        jclass matcher_class = env->FindClass("com/logentries/re2/RE2Matcher");
+        jmethodID addID = env->GetStaticMethodID(matcher_class, "addGroup", "(Lcom/logentries/re2/RE2Matcher;II)V");
+        for (int i=0; i<ngroups; i++) {
+            if (groups[i] != NULL) {
+                env->CallStaticObjectMethod(
+                    matcher_class,
+                    addID,
+                    matcher,
+                    static_cast<jint>(groups[i].data() - str),
+                    static_cast<jint>(groups[i].data() - str + groups[i].size())
+                );
+            } else {
+                env->CallStaticObjectMethod(matcher_class, addID,
+                    matcher, static_cast<jint>(-1), static_cast<jint>(-1));
+            }
+        }
+    }
+
+    delete[] heapgroups;
+    return static_cast<jboolean>(res);
+}
+
