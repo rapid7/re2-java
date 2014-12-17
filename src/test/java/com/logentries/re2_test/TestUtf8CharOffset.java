@@ -41,9 +41,7 @@ public class TestUtf8CharOffset {
         },{
             "a\uD83D\uDC36cd efg", asList(0,1,1,5,6,7,8,9,10), asList(0,1,1,1,1,3,4,5,6,7,8)
         },{
-            // but why on earth we have to spend time to support so fucking chars!!!!!
-            // damned, stupid teenagers! Why do they need for fucking paw prints in a char????
-            // I wish your asshole dog would die agonizing
+            // but why on earth we have to spend time to support chars!!!!!
             "\uD83D\uDC36\uD83D\uDC3Ecd efg", asList(0,0,4,4,8,9,10,11,12,13), asList(0,0,0,0,2,2,2,2,4,5,6,7,8,9)
         },{
             "\uD83D\uDD0D sp", asList(0,0,4,5,6), asList(0,0,0,0,2,3,4)
