@@ -147,9 +147,6 @@ JNIEXPORT void JNICALL Java_com_logentries_re2_RE2_releaseImpl
     delete pointer;
 }
 
-
-
-
 struct FullMatchCOp {
     const char *str_;
     const RE2 *pattern_;
@@ -172,9 +169,6 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_fullMatchImpl__Ljava_lang
     env->ReleaseStringUTFChars(j_str, str);
     return static_cast<jboolean>(res);
 }
-
-
-
 
 struct PartialMatchCOp {
     const char *str_;
@@ -199,7 +193,6 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_l
     return static_cast<jboolean>(res);
 }
 
-/* not used */
 struct FullMatchOp {
     const char *str_;
     const char *pattern_;
@@ -224,7 +217,6 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_fullMatchImpl__Ljava_lang
     return static_cast<jboolean>(res);
 }
 
-/* not used */
 struct PartialMatchOp {
     const char *str_;
     const char *pattern_;
