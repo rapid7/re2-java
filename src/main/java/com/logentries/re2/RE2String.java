@@ -41,7 +41,7 @@ public class RE2String implements CharSequence, AutoCloseable {
     }
 
     /**
-     * @deprecated You're doing it wrong! Do your fucking business!
+     * @deprecated
      */
     @Deprecated()
     long pointer() {
