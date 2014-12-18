@@ -7,15 +7,21 @@
 
 package com.logentries.re2;
 
+import com.logentries.re2.entity.CaptureGroup;
+import com.logentries.re2.entity.NamedGroup;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.MatchResult;
+
 public final class RE2 extends LibraryLoader implements AutoCloseable {
     private static native long compileImpl(final String pattern, final Options options) throws RegExprException;
     private static native void releaseImpl(final long pointer);
     private static native boolean fullMatchImpl(final String str, final long pointer, Object ... args);
     private static native boolean partialMatchImpl(final String str, final long pointer, Object ... args);
-
     private static native boolean fullMatchImpl(final String str, final String pattern, Object ... args);
     private static native boolean partialMatchImpl(final String str, final String pattern, Object ... args);
-
+    private static native List<String> getCaptureGroupNamesImpl(final long pointer, Object ... args);
     private static native int numberOfCapturingGroupsImpl(final long pointer);
 
     private long pointer;
@@ -117,6 +123,19 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         return partialMatchImpl(str, pointer, args);
     }
 
+    /**
+     * This method returns ordered names.
+     *
+     * @param args
+     * @return List of names for the capture groups
+     * @throws IllegalStateException
+     */
+    public List<String> getCaptureGroupNames(Object... args) throws IllegalStateException {
+        checkState();
+        checkArgs(args);
+        return getCaptureGroupNamesImpl(pointer, args);
+    }
+
     public RE2Matcher matcher(final CharSequence str) {
         return matcher(str, true);
     }
@@ -132,4 +151,51 @@ public final class RE2 extends LibraryLoader implements AutoCloseable {
         return new RE2Matcher(str, this, pointer, fetchGroups);
     }
 
+    /**
+     * Gets the ordered capture groups for this event message and pattern.
+     * @param str is an events message.
+     * @return is a list of CaptureGroups.
+     */
+    public List<CaptureGroup> getCaptureGroups(final String str) {
+        checkState();
+        List<CaptureGroup> captureGroups = new ArrayList<>();
+        RE2Matcher re2match = this.matcher(str);
+
+        try {
+            for (MatchResult match : re2match) {
+                for (int i = 1; i < match.groupCount(); i++) {
+                    if (match.start() > -1) {
+                        captureGroups.add(new CaptureGroup(match.group(i), match.start(i), match.end(i)));
+                    }
+                }
+            }
+        } catch (IndexOutOfBoundsException e) {
+            return captureGroups;
+        }
+        return captureGroups;
+    }
+
+    /**
+     * Returns a list of named capture groups and their position information in the event message.
+     * @param names is a list of names to match against.
+     * @param str is an events message.
+     * @return is a list of named capture groups.
+     */
+    public List<NamedGroup> getNamedCaptureGroups(List<String> names, final String str) {
+        List<NamedGroup> namedGroups = new ArrayList<>();
+        List<CaptureGroup> captureGroups = getCaptureGroups(str);
+        int len = names.size();
+
+        if (len != captureGroups.size()) {
+            // Matching text for a named group hasn't been found.
+            return namedGroups;
+        }
+
+        for (int i = 0; i < len; i++) {
+            if (captureGroups.get(i).start > -1) {
+                namedGroups.add(new NamedGroup(names.get(i), captureGroups.get(i)));
+            }
+        }
+        return namedGroups;
+    }
 }

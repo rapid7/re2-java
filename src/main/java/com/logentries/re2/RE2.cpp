@@ -9,11 +9,15 @@
 #include <boost/assert.hpp>
 #include <new>
 #include <cstdio>
+#include <string>
+#include <map>
+#include <iostream>
 #include "RE2.h"
 #include "op.h"
 #include "Options.h"
 
 using re2::StringPiece;
+using namespace std;
 
 template<typename Dst, typename Src>
 static Dst safe_cast(Src src) {
@@ -237,6 +241,29 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2_partialMatchImpl__Ljava_l
     return static_cast<jboolean>(res);
 }
 
+JNIEXPORT jobject JNICALL Java_com_logentries_re2_RE2_getCaptureGroupNamesImpl
+  (JNIEnv *env, jclass cls, jlong j_pointer, jobjectArray j_args) {
+    RE2 *pointer = reinterpret_cast<RE2*>(j_pointer);
+
+    jclass j_array_list = env->FindClass("java/util/ArrayList");
+    if (j_array_list == NULL) return NULL;
+
+    jmethodID arrayListCtor = env->GetMethodID(j_array_list, "<init>", "()V");
+    jmethodID add = env->GetMethodID(j_array_list, "add", "(Ljava/lang/Object;)Z");
+    jobject java_array_list = env->NewObject(j_array_list, arrayListCtor);
+
+    map<int, string> groupNames = (pointer->CapturingGroupNames());
+    map<int, string>::iterator it;
+
+    for (it = groupNames.begin(); it != groupNames.end(); ++it) {
+		jstring jvalue = env->NewStringUTF(it->second.c_str());
+
+		env->CallObjectMethod(java_array_list, add, jvalue);
+    };
+
+    return java_array_list;
+}
+
 JNIEXPORT jint JNICALL Java_com_logentries_re2_RE2_numberOfCapturingGroupsImpl
   (JNIEnv *env, jclass cls, jlong re2_pointer) {
 
@@ -302,4 +329,3 @@ JNIEXPORT jboolean JNICALL Java_com_logentries_re2_RE2Matcher_findImpl
     delete[] heapgroups;
     return static_cast<jboolean>(res);
 }
-

@@ -42,6 +42,12 @@ After seccessfull compilation you can run:
 But tests are very time and memory consuming and, at present, they print a lot of debug messages. Sorry if it is annoying,
 this binding is actually under development.
 
+### Generating header files - example ###
+
+From root folder containing pom.xml, src/ etc.
+
+    javah -jni -classpath "/home/<user>/repos/re2-java/src/main/java" -o src/main/java/com/logentries/re2/RE2.h com.logentries.re2.RE2
+
 ### Installation ###
 
 After running of `make`, directory `target` contains jar file with the library. You can include it to your `classpath`.
