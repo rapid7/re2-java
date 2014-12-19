@@ -227,7 +227,16 @@ is quite bad practise, dirty trick and that it introduces something what is in f
 But after I try it in a real code I decided that it is the best way to pass the values of submatches.
 ~~If you have any idea how to implement it in different way, please give me know.~~ *See Matcher interface above*
 
+### Named capture group extraction ###
 
+Capture group entities have a sub-string and a reference to the beginning and end index that this string corresponds to
+in a matched event. Named capture group entities wrap this and include a name.
+
+getCaptureGroups(), and getCaptureGroupNames() are two methods that are called by getNamedCaptureGroups() to create a list
+of NamedGroup entities. The lists returned by these methods are in order, allowing getNamedCaptureGroups to associate them,
+if the length of the returned lists differ we can assume that we cannot maintain association and return an empty list.
+
+getCaptureGroupNames uses the native RE2 method, getCaptureGroups uses the contributor code to get RE2Matcher objects.
 
 ### Options  ###
 
