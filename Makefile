@@ -25,6 +25,7 @@ $(OBJ)/RE2.o: .re2.download.stamp $(addprefix src/main/java/com/logentries/re2/,
 
 $(OBJ)/libre2-java.so: $(OBJ)/RE2.o .re2.compile.stamp
 	$(CXX) -shared -Wl,-soname,libre2-java.so -o $(OBJ)/libre2-java.so $(OBJ)/RE2.o -Lre2/obj/so -lre2 -lpthread
+	strip $(OBJ)/*
 
 class: build-class
 
